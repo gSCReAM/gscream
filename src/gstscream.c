@@ -139,8 +139,9 @@ static void gst_my_filter_class_init(GstSCReAMClass *klass) {
                            G_PARAM_READWRITE));
 
   gst_element_class_set_details_simple(
-      gstelement_class, "SCReAM", "FIXME:Generic",
-      "FIXME:Generic Template Element", " <<user@hostname.org>>");
+      gstelement_class, "SCReAM", "GStream Klass, scream alteration",
+      "Scream element", "Group of LTU Students. See Github for info: "
+                        "https://github.com/gSCReAM/gscream");
 
   gst_element_class_add_pad_template(gstelement_class,
                                      gst_static_pad_template_get(&src_factory));
@@ -312,7 +313,8 @@ static gboolean scream_init(GstPlugin *scream) {
    * exchange the string 'Template scream' with your description
    */
 
-  GST_DEBUG_CATEGORY_INIT(gst_my_filter_debug, "scream", 0, "Template scream");
+  GST_DEBUG_CATEGORY_INIT(gst_my_filter_debug, "scream", 0,
+                          "Congestion control");
 
   return gst_element_register(scream, "scream", GST_RANK_NONE,
                               GST_TYPE_MYFILTER);
@@ -332,5 +334,7 @@ static gboolean scream_init(GstPlugin *scream) {
  * exchange the string 'Template scream' with your scream description
  */
 GST_PLUGIN_DEFINE(GST_VERSION_MAJOR, GST_VERSION_MINOR, scream,
-                  "Hello future scream plugin", scream_init, VERSION, "LGPL",
-                  "GStreamer", "http://gstreamer.net/")
+                  "Congestion control using the SCReAM algorithm. Developed by "
+                  "LTU students for Ericsson.",
+                  scream_init, VERSION, "LGPL", "GStreamer",
+                  "http://gstreamer.net/")
