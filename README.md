@@ -1,7 +1,5 @@
 # Installing SCReAM plugin
 
-Test
-
 Within gst-scream folder, use ```./autogen.sh```, this should generate all the executable files within .libs
 
 Do ```make```.
