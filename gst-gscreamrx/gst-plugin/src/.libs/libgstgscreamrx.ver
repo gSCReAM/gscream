@@ -1,0 +1,5 @@
+{ global:
+gst_g_scream_rx_get_type;
+gst_plugin_gscreamrx_get_desc;
+gst_plugin_gscreamrx_register;
+local: *; };
