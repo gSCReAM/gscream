@@ -1,0 +1,3 @@
+gst_g_scream_tx_get_type
+gst_plugin_gscreamtx_get_desc
+gst_plugin_gscreamtx_register
