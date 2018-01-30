@@ -2,8 +2,8 @@
  * GStreamer
  * Copyright (C) 2005 Thomas Vander Stichele <thomas@apestaart.org>
  * Copyright (C) 2005 Ronald S. Bultje <rbultje@ronald.bitfreak.net>
- * Copyright (C) 2013  <<user@hostname.org>>
- *
+ * Copyright (C) YEAR AUTHOR_NAME AUTHOR_EMAIL
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -43,47 +43,44 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_SCREAM_H__
-#define __GST_SCREAM_H__
+#ifndef __GST_PLUGIN_TEMPLATE_H__
+#define __GST_PLUGIN_TEMPLATE_H__
 
 #include <gst/gst.h>
 
 G_BEGIN_DECLS
 
 /* #defines don't like whitespacey bits */
-#define GST_TYPE_MYFILTER \
-  (gst_my_screamObj_get_type())
-#define GST_SCREAM(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_MYFILTER,GstSCReAM))
-#define GST_SCREAM_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_MYFILTER,GstSCReAMClass))
-#define GST_IS_MYFILTER(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_MYFILTER))
-#define GST_IS_MYFILTER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_MYFILTER))
+#define GST_TYPE_PLUGIN_TEMPLATE \
+  (gst_plugin_template_get_type())
+#define GST_PLUGIN_TEMPLATE(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_PLUGIN_TEMPLATE,GstPluginTemplate))
+#define GST_PLUGIN_TEMPLATE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_PLUGIN_TEMPLATE,GstPluginTemplateClass))
+#define GST_IS_PLUGIN_TEMPLATE(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_PLUGIN_TEMPLATE))
+#define GST_IS_PLUGIN_TEMPLATE_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_PLUGIN_TEMPLATE))
 
-typedef struct _GstSCReAM      GstSCReAM;
-typedef struct _GstSCReAMClass GstSCReAMClass;
+typedef struct _GstPluginTemplate      GstPluginTemplate;
+typedef struct _GstPluginTemplateClass GstPluginTemplateClass;
 
-struct _GstSCReAM
+struct _GstPluginTemplate
 {
   GstElement element;
 
   GstPad *sinkpad, *srcpad;
 
   gboolean silent;
-  gboolean ping;
-  gboolean tx;
-  gboolean rx;
 };
 
-struct _GstSCReAMClass
+struct _GstPluginTemplateClass 
 {
   GstElementClass parent_class;
 };
 
-GType gst_my_screamObj_get_type (void);
+GType gst_plugin_template_get_type (void);
 
 G_END_DECLS
 
-#endif /* __GST_SCREAM_H__ */
+#endif /* __GST_PLUGIN_TEMPLATE_H__ */

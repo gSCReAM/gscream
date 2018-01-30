@@ -11,7 +11,7 @@
 2008-08-11  Stefan Kost  <ensonic@users.sf.net>
 
 	* README:
-	* src/gstaudiofilter.c:
+	* src/gstaudioscreamObj.c:
 	* src/gstplugin.c:
 	* src/gsttransform.c:
 	* tools/make_element:

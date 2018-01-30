@@ -65,8 +65,8 @@
 
 #include "gstscream.h"
 
-GST_DEBUG_CATEGORY_STATIC(gst_my_filter_debug);
-#define GST_CAT_DEFAULT gst_my_filter_debug
+GST_DEBUG_CATEGORY_STATIC(gst_scream_debug);
+#define GST_CAT_DEFAULT gst_scream_debug
 
 /* Filter signals and args */
 enum {
@@ -89,25 +89,25 @@ static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE(
 static GstStaticPadTemplate src_factory = GST_STATIC_PAD_TEMPLATE(
     "src", GST_PAD_SRC, GST_PAD_ALWAYS, GST_STATIC_CAPS("ANY"));
 
-#define gst_my_filter_parent_class parent_class
-G_DEFINE_TYPE(GstSCReAM, gst_my_filter, GST_TYPE_ELEMENT);
+#define gst_scream_parent_class parent_class
+G_DEFINE_TYPE(GstSCReAM, gst_scream, GST_TYPE_ELEMENT);
 
-static void gst_my_filter_set_property(GObject *object, guint prop_id,
-                                       const GValue *value, GParamSpec *pspec);
-static void gst_my_filter_get_property(GObject *object, guint prop_id,
-                                       GValue *value, GParamSpec *pspec);
+static void gst_scream_set_property(GObject *object, guint prop_id,
+                                    const GValue *value, GParamSpec *pspec);
+static void gst_scream_get_property(GObject *object, guint prop_id,
+                                    GValue *value, GParamSpec *pspec);
 
-static gboolean gst_my_filter_sink_event(GstPad *pad, GstObject *parent,
-                                         GstEvent *event);
-static GstFlowReturn gst_my_filter_chain(GstPad *pad, GstObject *parent,
-                                         GstBuffer *buf);
+static gboolean gst_scream_sink_event(GstPad *pad, GstObject *parent,
+                                      GstEvent *event);
+static GstFlowReturn gst_scream_chain(GstPad *pad, GstObject *parent,
+                                      GstBuffer *buf);
 
 static void ping_changed_cb();
 
 /* GObject vmethod implementations */
 
 /* initialize the scream's class */
-static void gst_my_filter_class_init(GstSCReAMClass *klass) {
+static void gst_scream_class_init(GstSCReAMClass *klass) {
 
   GObjectClass *gobject_class;
   GstElementClass *gstelement_class;
@@ -115,8 +115,8 @@ static void gst_my_filter_class_init(GstSCReAMClass *klass) {
   gobject_class = (GObjectClass *)klass;
   gstelement_class = (GstElementClass *)klass;
 
-  gobject_class->set_property = gst_my_filter_set_property;
-  gobject_class->get_property = gst_my_filter_get_property;
+  gobject_class->set_property = gst_scream_set_property;
+  gobject_class->get_property = gst_scream_get_property;
 
   g_object_class_install_property(
       gobject_class, PROP_SILENT,
@@ -157,48 +157,48 @@ static void ping_changed_cb() { // g_print("+");
  * set pad calback functions
  * initialize instance structure
  */
-static void gst_my_filter_init(GstSCReAM *filter) {
-  filter->sinkpad = gst_pad_new_from_static_template(&sink_factory, "sink");
+static void gst_scream_init(GstSCReAM *screamObj) {
+  screamObj->sinkpad = gst_pad_new_from_static_template(&sink_factory, "sink");
 
-  gst_pad_set_event_function(filter->sinkpad,
-                             GST_DEBUG_FUNCPTR(gst_my_filter_sink_event));
-  gst_pad_set_chain_function(filter->sinkpad,
-                             GST_DEBUG_FUNCPTR(gst_my_filter_chain));
-  GST_PAD_SET_PROXY_CAPS(filter->sinkpad);
-  gst_element_add_pad(GST_ELEMENT(filter), filter->sinkpad);
+  gst_pad_set_event_function(screamObj->sinkpad,
+                             GST_DEBUG_FUNCPTR(gst_scream_sink_event));
+  gst_pad_set_chain_function(screamObj->sinkpad,
+                             GST_DEBUG_FUNCPTR(gst_scream_chain));
+  GST_PAD_SET_PROXY_CAPS(screamObj->sinkpad);
+  gst_element_add_pad(GST_ELEMENT(screamObj), screamObj->sinkpad);
 
-  filter->srcpad = gst_pad_new_from_static_template(&src_factory, "src");
-  GST_PAD_SET_PROXY_CAPS(filter->srcpad);
-  gst_element_add_pad(GST_ELEMENT(filter), filter->srcpad);
+  screamObj->srcpad = gst_pad_new_from_static_template(&src_factory, "src");
+  GST_PAD_SET_PROXY_CAPS(screamObj->srcpad);
+  gst_element_add_pad(GST_ELEMENT(screamObj), screamObj->srcpad);
 
-  filter->silent = FALSE;
-  filter->ping = FALSE;
-  filter->tx = FALSE;
-  filter->rx = FALSE;
+  screamObj->silent = FALSE;
+  screamObj->ping = FALSE;
+  screamObj->tx = FALSE;
+  screamObj->rx = FALSE;
 
-  g_signal_connect(filter, "notify", G_CALLBACK(ping_changed_cb), NULL);
+  g_signal_connect(screamObj, "notify", G_CALLBACK(ping_changed_cb), NULL);
 }
 
-static void gst_my_filter_set_property(GObject *object, guint prop_id,
-                                       const GValue *value, GParamSpec *pspec) {
-  GstSCReAM *filter = GST_MYFILTER(object);
+static void gst_scream_set_property(GObject *object, guint prop_id,
+                                    const GValue *value, GParamSpec *pspec) {
+  GstSCReAM *screamObj = GST_SCREAM(object);
 
   switch (prop_id) {
   case PROP_SILENT:
-    filter->silent = g_value_get_boolean(value);
+    screamObj->silent = g_value_get_boolean(value);
     break;
 
   case PROP_TX:
-    filter->tx = g_value_get_boolean(value);
+    screamObj->tx = g_value_get_boolean(value);
     break;
 
   case PROP_PING:
-    filter->ping = g_value_get_boolean(value);
-    g_object_notify(G_OBJECT(filter), "ping");
+    screamObj->ping = g_value_get_boolean(value);
+    g_object_notify(G_OBJECT(screamObj), "ping");
     break;
 
   case PROP_RX:
-    filter->rx = g_value_get_boolean(value);
+    screamObj->rx = g_value_get_boolean(value);
     break;
 
   default:
@@ -207,26 +207,26 @@ static void gst_my_filter_set_property(GObject *object, guint prop_id,
   }
 }
 
-static void gst_my_filter_get_property(GObject *object, guint prop_id,
-                                       GValue *value, GParamSpec *pspec) {
-  GstSCReAM *filter = GST_MYFILTER(object);
+static void gst_scream_get_property(GObject *object, guint prop_id,
+                                    GValue *value, GParamSpec *pspec) {
+  GstSCReAM *screamObj = GST_SCREAM(object);
 
   switch (prop_id) {
 
   case PROP_SILENT:
-    g_value_set_boolean(value, filter->silent);
+    g_value_set_boolean(value, screamObj->silent);
     break;
 
   case PROP_PING:
-    g_value_set_boolean(value, filter->ping);
+    g_value_set_boolean(value, screamObj->ping);
     break;
 
   case PROP_TX:
-    g_value_set_boolean(value, filter->tx);
+    g_value_set_boolean(value, screamObj->tx);
     break;
 
   case PROP_RX:
-    g_value_set_boolean(value, filter->rx);
+    g_value_set_boolean(value, screamObj->rx);
     break;
 
   default:
@@ -238,12 +238,12 @@ static void gst_my_filter_get_property(GObject *object, guint prop_id,
 /* GstElement vmethod implementations */
 
 /* this function handles sink events */
-static gboolean gst_my_filter_sink_event(GstPad *pad, GstObject *parent,
-                                         GstEvent *event) {
+static gboolean gst_scream_sink_event(GstPad *pad, GstObject *parent,
+                                      GstEvent *event) {
   gboolean ret;
-  GstSCReAM *filter;
+  GstSCReAM *screamObj;
 
-  filter = GST_MYFILTER(parent);
+  screamObj = GST_SCREAM(parent);
 
   switch (GST_EVENT_TYPE(event)) {
   case GST_EVENT_CAPS: {
@@ -254,6 +254,18 @@ static gboolean gst_my_filter_sink_event(GstPad *pad, GstObject *parent,
 
     /* and forward */
     ret = gst_pad_event_default(pad, parent, event);
+    break;
+  }
+
+  case GST_EVENT_QOS: {
+    GstQOSType type;
+    gdouble proportion;
+    GstClockTimeDiff diff;
+    GstClockTime timestamp;
+
+    gst_event_parse_qos(event, &type, &proportion, &diff, &timestamp);
+
+    ret = gst_pad_push_event(screamObj->sinkpad, event);
     break;
   }
   default:
@@ -267,16 +279,16 @@ static gboolean gst_my_filter_sink_event(GstPad *pad, GstObject *parent,
  * this function does the actual processing
  */
 
-static GstFlowReturn gst_my_filter_chain(GstPad *pad, GstObject *parent,
-                                         GstBuffer *buf) {
-  GstSCReAM *filter;
-  filter = GST_MYFILTER(parent);
+static GstFlowReturn gst_scream_chain(GstPad *pad, GstObject *parent,
+                                      GstBuffer *buf) {
+  GstSCReAM *screamObj;
+  screamObj = GST_SCREAM(parent);
 
-  if (filter->ping == TRUE) {
-  } else if (filter->ping == FALSE) {
+  if (screamObj->ping == TRUE) {
+  } else if (screamObj->ping == FALSE) {
   }
 
-  if (filter->tx == TRUE) {
+  if (screamObj->tx == TRUE) {
     // TODO: Do transmitter stuff
     // Implement Scream algorithm here, check rpt queue and send appropriate
     // amount of packets
@@ -284,23 +296,23 @@ static GstFlowReturn gst_my_filter_chain(GstPad *pad, GstObject *parent,
     g_value_init(&a, G_TYPE_BOOLEAN);
     g_value_set_boolean(&a, 1);
 
-    gst_my_filter_set_property(G_OBJECT(filter), PROP_PING, &a,
-                               G_PARAM_READWRITE);
+    gst_scream_set_property(G_OBJECT(screamObj), PROP_PING, &a,
+                            G_PARAM_READWRITE);
   }
 
-  if (filter->rx == TRUE) {
+  if (screamObj->rx == TRUE) {
     // TODO: Do receiver stuff
     // Receive packets, notify tx of packets );
-    // gst_my_filter_get_property(G_OBJECT(filter), PROP_PING
+    // gst_scream_get_property(G_OBJECT(screamObj), PROP_PING
     //                                    G_PARAM_READWRITE);
   }
 
-  if (filter->rx == TRUE && filter->ping == TRUE) {
+  if (screamObj->rx == TRUE && screamObj->ping == TRUE) {
     g_print("Wohoo! \n");
   }
 
   /* just push out the incoming buffer without touching it */
-  return gst_pad_push(filter->srcpad, buf);
+  return gst_pad_push(screamObj->srcpad, buf);
 }
 
 /* entry point to initialize the plug-in
@@ -313,8 +325,7 @@ static gboolean scream_init(GstPlugin *scream) {
    * exchange the string 'Template scream' with your description
    */
 
-  GST_DEBUG_CATEGORY_INIT(gst_my_filter_debug, "scream", 0,
-                          "Congestion control");
+  GST_DEBUG_CATEGORY_INIT(gst_scream_debug, "scream", 0, "Congestion control");
 
   return gst_element_register(scream, "scream", GST_RANK_NONE,
                               GST_TYPE_MYFILTER);
