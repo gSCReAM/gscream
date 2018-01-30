@@ -51,16 +51,16 @@
 G_BEGIN_DECLS
 
 /* #defines don't like whitespacey bits */
-#define GST_TYPE_MYFILTER \
-  (gst_my_screamObj_get_type())
+#define GST_TYPE_SCREAM \
+  (gst_scream_get_type())
 #define GST_SCREAM(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_MYFILTER,GstSCReAM))
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_SCREAM,GstSCReAM))
 #define GST_SCREAM_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_MYFILTER,GstSCReAMClass))
-#define GST_IS_MYFILTER(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_MYFILTER))
-#define GST_IS_MYFILTER_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_MYFILTER))
+  (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_SCREAM,GstSCReAMClass))
+#define GST_IS_SCREAM(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_SCREAM))
+#define GST_IS_SCREAM_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_SCREAM))
 
 typedef struct _GstSCReAM      GstSCReAM;
 typedef struct _GstSCReAMClass GstSCReAMClass;
@@ -82,7 +82,7 @@ struct _GstSCReAMClass
   GstElementClass parent_class;
 };
 
-GType gst_my_screamObj_get_type (void);
+GType gst_screamObj_get_type (void);
 
 G_END_DECLS
 

@@ -144,32 +144,32 @@ gst_plugin_template_class_init (GstPluginTemplateClass * klass)
  * initialize instance structure
  */
 static void
-gst_plugin_template_init (GstPluginTemplate * filter)
+gst_plugin_template_init (GstPluginTemplate * screamObj)
 {
-  filter->sinkpad = gst_pad_new_from_static_template (&sink_factory, "sink");
-  gst_pad_set_event_function (filter->sinkpad,
+  screamObj->sinkpad = gst_pad_new_from_static_template (&sink_factory, "sink");
+  gst_pad_set_event_function (screamObj->sinkpad,
                               GST_DEBUG_FUNCPTR(gst_plugin_template_sink_event));
-  gst_pad_set_chain_function (filter->sinkpad,
+  gst_pad_set_chain_function (screamObj->sinkpad,
                               GST_DEBUG_FUNCPTR(gst_plugin_template_chain));
-  GST_PAD_SET_PROXY_CAPS (filter->sinkpad);
-  gst_element_add_pad (GST_ELEMENT (filter), filter->sinkpad);
+  GST_PAD_SET_PROXY_CAPS (screamObj->sinkpad);
+  gst_element_add_pad (GST_ELEMENT (screamObj), screamObj->sinkpad);
 
-  filter->srcpad = gst_pad_new_from_static_template (&src_factory, "src");
-  GST_PAD_SET_PROXY_CAPS (filter->srcpad);
-  gst_element_add_pad (GST_ELEMENT (filter), filter->srcpad);
+  screamObj->srcpad = gst_pad_new_from_static_template (&src_factory, "src");
+  GST_PAD_SET_PROXY_CAPS (screamObj->srcpad);
+  gst_element_add_pad (GST_ELEMENT (screamObj), screamObj->srcpad);
 
-  filter->silent = FALSE;
+  screamObj->silent = FALSE;
 }
 
 static void
 gst_plugin_template_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
-  GstPluginTemplate *filter = GST_PLUGIN_TEMPLATE (object);
+  GstPluginTemplate *screamObj = GST_PLUGIN_TEMPLATE (object);
 
   switch (prop_id) {
     case PROP_SILENT:
-      filter->silent = g_value_get_boolean (value);
+      screamObj->silent = g_value_get_boolean (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -181,11 +181,11 @@ static void
 gst_plugin_template_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec)
 {
-  GstPluginTemplate *filter = GST_PLUGIN_TEMPLATE (object);
+  GstPluginTemplate *screamObj = GST_PLUGIN_TEMPLATE (object);
 
   switch (prop_id) {
     case PROP_SILENT:
-      g_value_set_boolean (value, filter->silent);
+      g_value_set_boolean (value, screamObj->silent);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -200,9 +200,9 @@ static gboolean
 gst_plugin_template_sink_event (GstPad * pad, GstObject * parent, GstEvent * event)
 {
   gboolean ret;
-  GstPluginTemplate *filter;
+  GstPluginTemplate *screamObj;
 
-  filter = GST_PLUGIN_TEMPLATE (parent);
+  screamObj = GST_PLUGIN_TEMPLATE (parent);
 
   switch (GST_EVENT_TYPE (event)) {
     case GST_EVENT_CAPS:
@@ -229,15 +229,15 @@ gst_plugin_template_sink_event (GstPad * pad, GstObject * parent, GstEvent * eve
 static GstFlowReturn
 gst_plugin_template_chain (GstPad * pad, GstObject * parent, GstBuffer * buf)
 {
-  GstPluginTemplate *filter;
+  GstPluginTemplate *screamObj;
 
-  filter = GST_PLUGIN_TEMPLATE (parent);
+  screamObj = GST_PLUGIN_TEMPLATE (parent);
 
-  if (filter->silent == FALSE)
+  if (screamObj->silent == FALSE)
     g_print ("I'm plugged, therefore I'm in.\n");
 
   /* just push out the incoming buffer without touching it */
-  return gst_pad_push (filter->srcpad, buf);
+  return gst_pad_push (screamObj->srcpad, buf);
 }
 
 

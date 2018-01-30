@@ -99,6 +99,10 @@ static void gst_scream_get_property(GObject *object, guint prop_id,
 
 static gboolean gst_scream_sink_event(GstPad *pad, GstObject *parent,
                                       GstEvent *event);
+
+static gboolean gst_scream_src_event(GstPad *pad, GstObject *parent,
+                                     GstEvent *event);
+
 static GstFlowReturn gst_scream_chain(GstPad *pad, GstObject *parent,
                                       GstBuffer *buf);
 
@@ -169,6 +173,8 @@ static void gst_scream_init(GstSCReAM *screamObj) {
 
   screamObj->srcpad = gst_pad_new_from_static_template(&src_factory, "src");
   GST_PAD_SET_PROXY_CAPS(screamObj->srcpad);
+  gst_pad_set_event_function(screamObj->srcpad,
+                             GST_DEBUG_FUNCPTR(gst_scream_src_event));
   gst_element_add_pad(GST_ELEMENT(screamObj), screamObj->srcpad);
 
   screamObj->silent = FALSE;
@@ -275,6 +281,34 @@ static gboolean gst_scream_sink_event(GstPad *pad, GstObject *parent,
   return ret;
 }
 
+static gboolean gst_scream_src_event(GstPad *pad, GstObject *parent,
+                                     GstEvent *event) {
+  gboolean ret;
+  GstSCReAM *screamObj;
+
+  screamObj = GST_SCREAM(parent);
+
+  switch (GST_EVENT_TYPE(event)) {
+
+  case GST_EVENT_QOS: {
+    GstQOSType type;
+    gdouble proportion;
+    GstClockTimeDiff diff;
+    GstClockTime timestamp;
+
+    gst_event_parse_qos(event, &type, &proportion, &diff, &timestamp);
+
+    ret = gst_pad_push_event(screamObj->srcpad, event);
+    g_print("I am in src event QOS thingie");
+    break;
+  }
+  default:
+    ret = gst_pad_event_default(pad, parent, event);
+    break;
+  }
+  return ret;
+}
+
 /* chain function
  * this function does the actual processing
  */
@@ -305,6 +339,7 @@ static GstFlowReturn gst_scream_chain(GstPad *pad, GstObject *parent,
     // Receive packets, notify tx of packets );
     // gst_scream_get_property(G_OBJECT(screamObj), PROP_PING
     //                                    G_PARAM_READWRITE);
+    gst_pad_send_event(screamObj->srcpad, GST_EVENT_QOS);
   }
 
   if (screamObj->rx == TRUE && screamObj->ping == TRUE) {
@@ -328,7 +363,7 @@ static gboolean scream_init(GstPlugin *scream) {
   GST_DEBUG_CATEGORY_INIT(gst_scream_debug, "scream", 0, "Congestion control");
 
   return gst_element_register(scream, "scream", GST_RANK_NONE,
-                              GST_TYPE_MYFILTER);
+                              GST_TYPE_SCREAM);
 }
 
 /* PACKAGE: this is usually set by autotools depending on some _INIT macro
