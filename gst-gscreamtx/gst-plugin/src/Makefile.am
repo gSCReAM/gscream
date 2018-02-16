@@ -16,14 +16,15 @@ plugin_LTLIBRARIES = libgstgscreamtx.la
 ## Plugin 1
 
 # sources used to compile this plug-in
-libgstgscreamtx_la_SOURCES = gstgscreamtx.c gstgscreamtx.h
+libgstgscreamtx_la_SOURCES = gstgscreamtx.cpp gstgscreamtx.h ScreamTx.h TestFile.h
 
 # compiler and linker flags used to compile this plugin, set in configure.ac
-libgstgscreamtx_la_CFLAGS = $(GST_CFLAGS)
-libgstgscreamtx_la_LIBADD = $(GST_LIBS)
+libgstgscreamtx_la_CFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_CFLAGS)
+libgstgscreamtx_la_CXXFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_CXXFLAGS)
+libgstgscreamtx_la_LIBADD = $(GST_PLUGINS_BASE_LIBS) -lgstvideo-1.0 $(GST_LIBS) $(OPENH264_LIBS)
 libgstgscreamtx_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstgscreamtx_la_LIBTOOLFLAGS = --tag=disable-static
 
 
 # headers we need but don't want installed
-noinst_HEADERS = gstgscreamtx.h
+noinst_HEADERS = gstgscreamtx.h ScreamTx.h TestFile.h

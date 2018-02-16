@@ -14,10 +14,10 @@ library_names='libgstgscreamtx.so libgstgscreamtx.so libgstgscreamtx.so'
 old_library=''
 
 # Linker flags that cannot go in dependency_libs.
-inherited_linker_flags=' -pthread'
+inherited_linker_flags=''
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/home/scream/gst/master/gstreamer/libs/gst/controller/.libs -L/home/scream/gst/master/gstreamer/libs/gst/base/.libs -L/home/scream/gst/master/gstreamer/gst/.libs -L/home/scream/gst/master/gst-plugins-base/gst-libs/gst/audio/.libs /usr/local/lib/libgstcontroller-1.0.la /usr/local/lib/libgstaudio-1.0.la /usr/local/lib/libgsttag-1.0.la -lz -lorc-0.4 /usr/local/lib/libgstbase-1.0.la /usr/local/lib/libgstreamer-1.0.la /usr/local/lib/libgstreamer-1.0.la -lgmodule-2.0 -lm -lrt -ldl -lgobject-2.0 -lglib-2.0'
+dependency_libs=' -lgstvideo-1.0 -lgstcontroller-1.0 -lgstaudio-1.0 -lgstbase-1.0 -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''

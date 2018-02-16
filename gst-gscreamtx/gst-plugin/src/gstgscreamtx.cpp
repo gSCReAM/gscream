@@ -3,7 +3,7 @@
  * Copyright (C) 2005 Thomas Vander Stichele <thomas@apestaart.org>
  * Copyright (C) 2005 Ronald S. Bultje <rbultje@ronald.bitfreak.net>
  * Copyright (C) 2018  <<user@hostname.org>>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
@@ -60,9 +60,14 @@
 #  include <config.h>
 #endif
 
+#include <gmpxx.h>
 #include <gst/gst.h>
 
 #include "gstgscreamtx.h"
+
+
+#include "TestFile.h"
+#include "ScreamTx.h"
 
 GST_DEBUG_CATEGORY_STATIC (gst_g_scream_tx_debug);
 #define GST_CAT_DEFAULT gst_g_scream_tx_debug
@@ -158,7 +163,9 @@ gst_g_scream_tx_init (GstgScreamTx * filter)
   GST_PAD_SET_PROXY_CAPS (filter->srcpad);
   gst_element_add_pad (GST_ELEMENT (filter), filter->srcpad);
 
-  filter->silent = FALSE;
+  ScreamTx *screamTx = new ScreamTx();
+  
+  filter->silent = TRUE;
 }
 
 static void
