@@ -139,9 +139,9 @@ AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-libgstgscreamtx_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+libgstgscreamtx_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(libgstgscreamtx_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
-	$(CCLD) $(libgstgscreamtx_la_CFLAGS) $(CFLAGS) \
+	$(CXXLD) $(libgstgscreamtx_la_CXXFLAGS) $(CXXFLAGS) \
 	$(libgstgscreamtx_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
@@ -159,6 +159,24 @@ DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
+AM_V_CXX = $(am__v_CXX_$(V))
+am__v_CXX_ = $(am__v_CXX_$(AM_DEFAULT_VERBOSITY))
+am__v_CXX_0 = @echo "  CXX     " $@;
+am__v_CXX_1 = 
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_CXXLD = $(am__v_CXXLD_$(V))
+am__v_CXXLD_ = $(am__v_CXXLD_$(AM_DEFAULT_VERBOSITY))
+am__v_CXXLD_0 = @echo "  CXXLD   " $@;
+am__v_CXXLD_1 = 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -206,19 +224,23 @@ ETAGS = etags
 CTAGS = ctags
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/depcomp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/scream/gst/master/gst-gscreamtx/gst-plugin/missing aclocal-1.15
+ACLOCAL = ${SHELL} /home/scream/gst/master/gscream/gst-gscreamtx/gst-plugin/missing aclocal-1.15
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
 AR = ar
-AUTOCONF = ${SHELL} /home/scream/gst/master/gst-gscreamtx/gst-plugin/missing autoconf
-AUTOHEADER = ${SHELL} /home/scream/gst/master/gst-gscreamtx/gst-plugin/missing autoheader
-AUTOMAKE = ${SHELL} /home/scream/gst/master/gst-gscreamtx/gst-plugin/missing automake-1.15
+AUTOCONF = ${SHELL} /home/scream/gst/master/gscream/gst-gscreamtx/gst-plugin/missing autoconf
+AUTOHEADER = ${SHELL} /home/scream/gst/master/gscream/gst-gscreamtx/gst-plugin/missing autoheader
+AUTOMAKE = ${SHELL} /home/scream/gst/master/gscream/gst-gscreamtx/gst-plugin/missing automake-1.15
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -O2 -Wall
 CPP = gcc -E
 CPPFLAGS = 
+CXX = g++
+CXXCPP = g++ -E
+CXXDEPMODE = depmode=gcc3
+CXXFLAGS = -g -O2
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -232,8 +254,8 @@ EGREP = /bin/grep -E
 EXEEXT = 
 FGREP = /bin/grep -F
 GREP = /bin/grep
-GST_CFLAGS = -pthread -I/home/scream/gst/master/gstreamer/libs -I/home/scream/gst/master/gstreamer -I/home/scream/gst/master/gstreamer/libs -I/home/scream/gst/master/gstreamer -I/home/scream/gst/master/gstreamer/libs -I/home/scream/gst/master/gst-plugins-base/gst-libs -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -Wall
-GST_LIBS = -L/home/scream/gst/master/gstreamer/libs/gst/controller/.libs -L/home/scream/gst/master/gstreamer/libs/gst/base/.libs -L/home/scream/gst/master/gstreamer/gst/.libs -L/home/scream/gst/master/gst-plugins-base/gst-libs/gst/audio/.libs -lgstcontroller-1.0 -lgstaudio-1.0 -lgstbase-1.0 -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0
+GST_CFLAGS = -pthread -I/usr/include/gstreamer-1.0 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -Wall
+GST_LIBS = -lgstcontroller-1.0 -lgstaudio-1.0 -lgstbase-1.0 -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0
 GST_PLUGIN_LDFLAGS = -module -avoid-version -export-symbols-regex _*\(gst_\|Gst\|GST_\).*
 HAVE_PKGCONFIG =  
 INSTALL = /usr/bin/install -c
@@ -251,7 +273,7 @@ LN_S = ln -s
 LTLIBOBJS = 
 LT_SYS_LIBRARY_PATH = 
 MAINT = 
-MAKEINFO = ${SHELL} /home/scream/gst/master/gst-gscreamtx/gst-plugin/missing makeinfo
+MAKEINFO = ${SHELL} /home/scream/gst/master/gscream/gst-gscreamtx/gst-plugin/missing makeinfo
 MANIFEST_TOOL = :
 MKDIR_P = /bin/mkdir -p
 NM = /usr/bin/nm -B
@@ -270,19 +292,20 @@ PACKAGE_VERSION = 1.0.0
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
-PKG_CONFIG_PATH = /home/scream/gst/master/gst-devtools/validate/pkgconfig:/home/scream/gst/master/totem-pl-parser:/home/scream/gst/master/clutter-gst:/home/scream/gst/master/prefix/lib/pkgconfig:/home/scream/gst/master/gstreamer/pkgconfig:/home/scream/gst/master/gst-plugins-base/pkgconfig:/home/scream/gst/master/gst-plugins-good/pkgconfig:/home/scream/gst/master/gst-plugins-ugly/pkgconfig:/home/scream/gst/master/gst-plugins-bad/pkgconfig:/home/scream/gst/master/gst-libav/pkgconfig:/home/scream/gst/master/gst-ffmpeg/pkgconfig:/home/scream/gst/master/gst-python/pkgconfig:/home/scream/gst/master/gst-rtsp-server/pkgconfig:/home/scream/gst/master/gst-editing-services/pkgconfig:/home/scream/gst/master/gstreamer-sharp/pkgconfig:/home/scream/gst/master/gstreamer-vaapi/pkgconfig:/home/scream/gst/master/orc:/home/scream/gst/master/farsight2:/home/scream/gst/master/libnice/nice:/home/scream/gst/master/gst-devtools/validate/pkgconfig:/home/scream/gst/master/totem-pl-parser:/home/scream/gst/master/clutter-gst:/home/scream/gst/master/prefix/lib/pkgconfig:/home/scream/gst/master/gstreamer/pkgconfig:/home/scream/gst/master/gst-plugins-base/pkgconfig:/home/scream/gst/master/gst-plugins-good/pkgconfig:/home/scream/gst/master/gst-plugins-ugly/pkgconfig:/home/scream/gst/master/gst-plugins-bad/pkgconfig:/home/scream/gst/master/gst-libav/pkgconfig:/home/scream/gst/master/gst-ffmpeg/pkgconfig:/home/scream/gst/master/gst-python/pkgconfig:/home/scream/gst/master/gst-rtsp-server/pkgconfig:/home/scream/gst/master/gst-editing-services/pkgconfig:/home/scream/gst/master/gstreamer-sharp/pkgconfig:/home/scream/gst/master/gstreamer-vaapi/pkgconfig:/home/scream/gst/master/orc:/home/scream/gst/master/farsight2:/home/scream/gst/master/libnice/nice:/home/scream/gst/master/gst-devtools/validate/pkgconfig:/home/scream/gst/master/totem-pl-parser:/home/scream/gst/master/clutter-gst:/home/scream/gst/master/prefix/lib/pkgconfig:/home/scream/gst/master/gstreamer/pkgconfig:/home/scream/gst/master/gst-plugins-base/pkgconfig:/home/scream/gst/master/gst-plugins-good/pkgconfig:/home/scream/gst/master/gst-plugins-ugly/pkgconfig:/home/scream/gst/master/gst-plugins-bad/pkgconfig:/home/scream/gst/master/gst-libav/pkgconfig:/home/scream/gst/master/gst-ffmpeg/pkgconfig:/home/scream/gst/master/gst-python/pkgconfig:/home/scream/gst/master/gst-rtsp-server/pkgconfig:/home/scream/gst/master/gst-editing-services/pkgconfig:/home/scream/gst/master/gstreamer-sharp/pkgconfig:/home/scream/gst/master/gstreamer-vaapi/pkgconfig:/home/scream/gst/master/orc:/home/scream/gst/master/farsight2:/home/scream/gst/master/libnice/nice
+PKG_CONFIG_PATH = 
 RANLIB = ranlib
 SED = /bin/sed
 SET_MAKE = 
 SHELL = /bin/bash
 STRIP = strip
 VERSION = 1.0.0
-abs_builddir = /home/scream/gst/master/gst-gscreamtx/gst-plugin/src
-abs_srcdir = /home/scream/gst/master/gst-gscreamtx/gst-plugin/src
-abs_top_builddir = /home/scream/gst/master/gst-gscreamtx/gst-plugin
-abs_top_srcdir = /home/scream/gst/master/gst-gscreamtx/gst-plugin
+abs_builddir = /home/scream/gst/master/gscream/gst-gscreamtx/gst-plugin/src
+abs_srcdir = /home/scream/gst/master/gscream/gst-gscreamtx/gst-plugin/src
+abs_top_builddir = /home/scream/gst/master/gscream/gst-gscreamtx/gst-plugin
+abs_top_srcdir = /home/scream/gst/master/gscream/gst-gscreamtx/gst-plugin
 ac_ct_AR = ar
 ac_ct_CC = gcc
+ac_ct_CXX = g++
 ac_ct_DUMPBIN = 
 am__include = include
 am__leading_dot = .
@@ -309,7 +332,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/scream/gst/master/gst-gscreamtx/gst-plugin/install-sh
+install_sh = ${SHELL} /home/scream/gst/master/gscream/gst-gscreamtx/gst-plugin/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -346,20 +369,21 @@ plugin_LTLIBRARIES = libgstgscreamtx.la
 ##############################################################################
 
 # sources used to compile this plug-in
-libgstgscreamtx_la_SOURCES = gstgscreamtx.c gstgscreamtx.h
+libgstgscreamtx_la_SOURCES = gstgscreamtx.cpp gstgscreamtx.h ScreamTx.h TestFile.h
 
 # compiler and linker flags used to compile this plugin, set in configure.ac
-libgstgscreamtx_la_CFLAGS = $(GST_CFLAGS)
-libgstgscreamtx_la_LIBADD = $(GST_LIBS)
+libgstgscreamtx_la_CFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_CFLAGS)
+libgstgscreamtx_la_CXXFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_CXXFLAGS)
+libgstgscreamtx_la_LIBADD = $(GST_PLUGINS_BASE_LIBS) -lgstvideo-1.0 $(GST_LIBS) $(OPENH264_LIBS)
 libgstgscreamtx_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstgscreamtx_la_LIBTOOLFLAGS = --tag=disable-static
 
 # headers we need but don't want installed
-noinst_HEADERS = gstgscreamtx.h
+noinst_HEADERS = gstgscreamtx.h ScreamTx.h TestFile.h
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .cpp .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -426,7 +450,7 @@ clean-pluginLTLIBRARIES:
 	}
 
 libgstgscreamtx.la: $(libgstgscreamtx_la_OBJECTS) $(libgstgscreamtx_la_DEPENDENCIES) $(EXTRA_libgstgscreamtx_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libgstgscreamtx_la_LINK) -rpath $(plugindir) $(libgstgscreamtx_la_OBJECTS) $(libgstgscreamtx_la_LIBADD) $(LIBS)
+	$(AM_V_CXXLD)$(libgstgscreamtx_la_LINK) -rpath $(plugindir) $(libgstgscreamtx_la_OBJECTS) $(libgstgscreamtx_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -436,33 +460,33 @@ distclean-compile:
 
 include ./$(DEPDIR)/libgstgscreamtx_la-gstgscreamtx.Plo
 
-.c.o:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+.cpp.o:
+	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
 	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	$(AM_V_CC)source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(COMPILE) -c -o $@ $<
+#	$(AM_V_CXX)source='$<' object='$@' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXXCOMPILE) -c -o $@ $<
 
-.c.obj:
-	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+.cpp.obj:
+	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
 	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-#	$(AM_V_CC)source='$<' object='$@' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+#	$(AM_V_CXX)source='$<' object='$@' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-.c.lo:
-	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+.cpp.lo:
+	$(AM_V_CXX)$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
 	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
-#	$(AM_V_CC)source='$<' object='$@' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(LTCOMPILE) -c -o $@ $<
+#	$(AM_V_CXX)source='$<' object='$@' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LTCXXCOMPILE) -c -o $@ $<
 
-libgstgscreamtx_la-gstgscreamtx.lo: gstgscreamtx.c
-	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(libgstgscreamtx_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgstgscreamtx_la_CFLAGS) $(CFLAGS) -MT libgstgscreamtx_la-gstgscreamtx.lo -MD -MP -MF $(DEPDIR)/libgstgscreamtx_la-gstgscreamtx.Tpo -c -o libgstgscreamtx_la-gstgscreamtx.lo `test -f 'gstgscreamtx.c' || echo '$(srcdir)/'`gstgscreamtx.c
+libgstgscreamtx_la-gstgscreamtx.lo: gstgscreamtx.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(libgstgscreamtx_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgstgscreamtx_la_CXXFLAGS) $(CXXFLAGS) -MT libgstgscreamtx_la-gstgscreamtx.lo -MD -MP -MF $(DEPDIR)/libgstgscreamtx_la-gstgscreamtx.Tpo -c -o libgstgscreamtx_la-gstgscreamtx.lo `test -f 'gstgscreamtx.cpp' || echo '$(srcdir)/'`gstgscreamtx.cpp
 	$(AM_V_at)$(am__mv) $(DEPDIR)/libgstgscreamtx_la-gstgscreamtx.Tpo $(DEPDIR)/libgstgscreamtx_la-gstgscreamtx.Plo
-#	$(AM_V_CC)source='gstgscreamtx.c' object='libgstgscreamtx_la-gstgscreamtx.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(AM_V_CC_no)$(LIBTOOL) $(AM_V_lt) --tag=CC $(libgstgscreamtx_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgstgscreamtx_la_CFLAGS) $(CFLAGS) -c -o libgstgscreamtx_la-gstgscreamtx.lo `test -f 'gstgscreamtx.c' || echo '$(srcdir)/'`gstgscreamtx.c
+#	$(AM_V_CXX)source='gstgscreamtx.cpp' object='libgstgscreamtx_la-gstgscreamtx.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(libgstgscreamtx_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgstgscreamtx_la_CXXFLAGS) $(CXXFLAGS) -c -o libgstgscreamtx_la-gstgscreamtx.lo `test -f 'gstgscreamtx.cpp' || echo '$(srcdir)/'`gstgscreamtx.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo

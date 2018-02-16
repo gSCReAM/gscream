@@ -8,7 +8,7 @@ dnl required versions of gstreamer and plugins-base
 GST_REQUIRED=1.0.0
 GSTPB_REQUIRED=1.0.0
 
-AC_CONFIG_SRCDIR([src/gstplugin.c])
+AC_CONFIG_SRCDIR([src/gstplugin.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 dnl required version of automake
@@ -19,6 +19,8 @@ AM_MAINTAINER_MODE([enable])
 
 dnl check for tools (compiler etc.)
 AC_PROG_CC
+
+AC_PROG_CXX
 
 dnl required version of libtool
 LT_PREREQ([2.2.6])
@@ -85,4 +87,3 @@ AC_SUBST(GST_PLUGIN_LDFLAGS)
 
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
-
