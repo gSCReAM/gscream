@@ -140,9 +140,6 @@ ScreamTx::ScreamTx(float lossBeta_,
     maxRate(0.0f),
     baseOwdHistMin(UINT32_MAX)
 {
-
-
-    g_print ("Hello im inside ScreamTx.h\n");
     if (cwnd_ == 0) {
         cwnd = kInitMss * 2;
     }
@@ -273,6 +270,10 @@ void ScreamTx::registerNewStream(RtpQueueIface *rtpQueue,
         lossEventRateScale,
         ecnCeEventRateScale);
     streams[nStreams++] = stream;
+}
+
+void ScreamTx::assertWorking(){
+  cout << "Hello im in ScreamTx body file \n";
 }
 
 void ScreamTx::updateBitrateStream(uint32_t ssrc,

@@ -15,7 +15,9 @@ using namespace std;
 *  + Other obvious stuff such as RTP payload packetizer, video+audio capture, coders....
 *
 */
-G_BEGIN_DECLS
+
+extern "C" {
+
 // ==== Default parameters (if tuning necessary) ====
 // Connection related default parameters
 // CWND scale factor upon loss event
@@ -54,8 +56,6 @@ static const float kQueueDelayGuard = 0.1f;
 static const float kLossEventRateScale = 0.9f;
 // Video rate scaling due to ECN marking events
 static const float kEcnCeEventRateScale = 0.95f;
-
-
 
 // Constants
 /*
@@ -114,11 +114,10 @@ public:
         float cautiousPacing = 0.0f,
         int bytesInFlightHistSize = 5,
         bool isL4s = false,
-        bool openWindow = false){
-                  g_print("Fuck headerfiles  im in the scream thingie\n");
-        };
+        bool openWindow = false);
 
     ~ScreamTx();
+
     /*
     * Register a new stream {SSRC,PT} tuple,
     *  with a priority value in the range ]0.0..1.0]
@@ -247,6 +246,8 @@ public:
     * Get verbose log information
     */
     void getLog(float time, char *s);
+
+    void assertWorking();
 
     /*
     * Get verbose log information
@@ -627,5 +628,5 @@ private:
 
 };
 
-G_END_DECLS
+}
 #endif

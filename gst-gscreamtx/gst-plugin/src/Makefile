@@ -133,7 +133,8 @@ am__installdirs = "$(DESTDIR)$(plugindir)"
 LTLIBRARIES = $(plugin_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libgstgscreamtx_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
-am_libgstgscreamtx_la_OBJECTS = libgstgscreamtx_la-gstgscreamtx.lo
+am_libgstgscreamtx_la_OBJECTS = libgstgscreamtx_la-gstgscreamtx.lo \
+	libgstgscreamtx_la-ScreamTx.lo
 libgstgscreamtx_la_OBJECTS = $(am_libgstgscreamtx_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
@@ -369,7 +370,7 @@ plugin_LTLIBRARIES = libgstgscreamtx.la
 ##############################################################################
 
 # sources used to compile this plug-in
-libgstgscreamtx_la_SOURCES = gstgscreamtx.cpp gstgscreamtx.h ScreamTx.h TestFile.h
+libgstgscreamtx_la_SOURCES = gstgscreamtx.cpp gstgscreamtx.h ScreamTx.h TestFile.h ScreamTx.cpp
 
 # compiler and linker flags used to compile this plugin, set in configure.ac
 libgstgscreamtx_la_CFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_CFLAGS)
@@ -379,7 +380,7 @@ libgstgscreamtx_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
 libgstgscreamtx_la_LIBTOOLFLAGS = --tag=disable-static
 
 # headers we need but don't want installed
-noinst_HEADERS = gstgscreamtx.h ScreamTx.h TestFile.h
+noinst_HEADERS = gstgscreamtx.h ScreamTx.h
 all: all-am
 
 .SUFFIXES:
@@ -458,6 +459,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/libgstgscreamtx_la-ScreamTx.Plo
 include ./$(DEPDIR)/libgstgscreamtx_la-gstgscreamtx.Plo
 
 .cpp.o:
@@ -487,6 +489,13 @@ libgstgscreamtx_la-gstgscreamtx.lo: gstgscreamtx.cpp
 #	$(AM_V_CXX)source='gstgscreamtx.cpp' object='libgstgscreamtx_la-gstgscreamtx.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(libgstgscreamtx_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgstgscreamtx_la_CXXFLAGS) $(CXXFLAGS) -c -o libgstgscreamtx_la-gstgscreamtx.lo `test -f 'gstgscreamtx.cpp' || echo '$(srcdir)/'`gstgscreamtx.cpp
+
+libgstgscreamtx_la-ScreamTx.lo: ScreamTx.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(libgstgscreamtx_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgstgscreamtx_la_CXXFLAGS) $(CXXFLAGS) -MT libgstgscreamtx_la-ScreamTx.lo -MD -MP -MF $(DEPDIR)/libgstgscreamtx_la-ScreamTx.Tpo -c -o libgstgscreamtx_la-ScreamTx.lo `test -f 'ScreamTx.cpp' || echo '$(srcdir)/'`ScreamTx.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libgstgscreamtx_la-ScreamTx.Tpo $(DEPDIR)/libgstgscreamtx_la-ScreamTx.Plo
+#	$(AM_V_CXX)source='ScreamTx.cpp' object='libgstgscreamtx_la-ScreamTx.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(libgstgscreamtx_la_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libgstgscreamtx_la_CXXFLAGS) $(CXXFLAGS) -c -o libgstgscreamtx_la-ScreamTx.lo `test -f 'ScreamTx.cpp' || echo '$(srcdir)/'`ScreamTx.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo

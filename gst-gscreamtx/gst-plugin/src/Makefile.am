@@ -16,7 +16,7 @@ plugin_LTLIBRARIES = libgstgscreamtx.la
 ## Plugin 1
 
 # sources used to compile this plug-in
-libgstgscreamtx_la_SOURCES = gstgscreamtx.cpp gstgscreamtx.h ScreamTx.h TestFile.h
+libgstgscreamtx_la_SOURCES = gstgscreamtx.cpp gstgscreamtx.h ScreamTx.h TestFile.h ScreamTx.cpp
 
 # compiler and linker flags used to compile this plugin, set in configure.ac
 libgstgscreamtx_la_CFLAGS = $(GST_PLUGINS_BASE_CFLAGS) $(GST_CFLAGS)
@@ -27,4 +27,4 @@ libgstgscreamtx_la_LIBTOOLFLAGS = --tag=disable-static
 
 
 # headers we need but don't want installed
-noinst_HEADERS = gstgscreamtx.h ScreamTx.h TestFile.h
+noinst_HEADERS = gstgscreamtx.h ScreamTx.h

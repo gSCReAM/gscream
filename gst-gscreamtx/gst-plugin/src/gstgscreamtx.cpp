@@ -164,7 +164,8 @@ gst_g_scream_tx_init (GstgScreamTx * filter)
   gst_element_add_pad (GST_ELEMENT (filter), filter->srcpad);
 
   ScreamTx *screamTx = new ScreamTx();
-  
+  screamTx->assertWorking();
+
   filter->silent = TRUE;
 }
 
@@ -211,7 +212,7 @@ gst_g_scream_tx_sink_event (GstPad * pad, GstObject * parent, GstEvent * event)
 
   filter = GST_GSCREAMTX (parent);
 
-  GST_LOG_OBJECT (filter, "Received %s event: %" GST_PTR_FORMAT,
+  GST_LOG_OBJECT (filter, "Received %s event: %", GST_PTR_FORMAT,
       GST_EVENT_TYPE_NAME (event), event);
 
   switch (GST_EVENT_TYPE (event)) {
