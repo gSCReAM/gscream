@@ -43,30 +43,44 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/**
- * SECTION:element-gscreamtx
- *
- * FIXME:Describe gscreamtx here.
- *
- * <refsect2>
- * <title>Example launch line</title>
- * |[
- * gst-launch -v -m fakesrc ! gscreamtx ! fakesink silent=TRUE
- * ]|
- * </refsect2>
- */
+
+/*
+    ---- Nuvarande stadie ----
+
+
+Uppgift 1: Vi vill kunna skicka RTC/RTCP paket samt manipulera dataströmmen för att implementera SCReAM.
+
+Vår approach: skapa ett bin element som har rtp/rtcp element vilket vi vill koppla gstreamers pipeline till.
+   - Vi kan skapa element och binda samman dom i en intern pipeline (sett i bind_communication).
+   - Tanken är att vi ska koppla gstreamers pipeline till denna pipeline.
+   - Tanken är även att denna interna pipeline har udp sockets/udp pads för att ta emot/skicka data.
+   - Vi har inte börjat kolla på ghostpads ännu, men fick höra i ett möte att detta är hur det bör fungera, tanken är att implementera detta.
+
+Vårt problem:
+  - Vid gst_element_link_pads (scream, "src", rtpbin, "recv_rtcp_sink_0"); (ungefär rad 350) är vårt problem att koppla samman scream src pad
+  med rtpbins sink pad.
+  - Vi vet inte riktigt vart som padsen ska bli kopplade, inte heller vart som dataströmmen ska "matas in" i denna pipeline.
+
+Uppgift 2: Implementera någon slags "RTP queue" som ska matas in i screamtx.registerNewStream("RTP queue", ...)
+
+Vår approach: Följa Ingemars testapplikation sett i scream_transmitter.cpp och sedan konvertera trådar och mutex till gst_task
+
+Vårt problem:
+  - Vi har inte försökt så mycket än. Så det mesta.
+
+Prio för tillfället: Uppgift 1. Huvudproblemet är just att koppla pipelinen till individuella element. Kan vi fixa det så kan vi förmodligen fixa
+resten själva. 
+
+*/
 
 #ifdef HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
-#include <gmpxx.h>
 #include <gst/gst.h>
 
 #include "gstgscreamtx.h"
 
-
-#include "TestFile.h"
 #include "ScreamTx.h"
 
 GST_DEBUG_CATEGORY_STATIC (gst_g_scream_tx_debug);
@@ -84,39 +98,18 @@ enum
   PROP_0,
   PROP_SILENT
 };
+#define DEST_HOST "127.0.0.1"
 
 /* the capabilities of the inputs and outputs.
  *
  * describe the real formats here.
  */
-static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE ("sink",
-    GST_PAD_SINK,
-    GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("ANY")
-    );
-
-static GstStaticPadTemplate src_factory = GST_STATIC_PAD_TEMPLATE ("src",
-    GST_PAD_SRC,
-    GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("ANY")
-    );
-
-#define gst_g_scream_tx_parent_class parent_class
-G_DEFINE_TYPE (GstgScreamTx, gst_g_scream_tx, GST_TYPE_ELEMENT);
-
-static void gst_g_scream_tx_set_property (GObject * object, guint prop_id,
-    const GValue * value, GParamSpec * pspec);
-static void gst_g_scream_tx_get_property (GObject * object, guint prop_id,
-    GValue * value, GParamSpec * pspec);
-
-static gboolean gst_g_scream_tx_sink_event (GstPad * pad, GstObject * parent, GstEvent * event);
-static GstFlowReturn gst_g_scream_tx_chain (GstPad * pad, GstObject * parent, GstBuffer * buf);
 
 /* GObject vmethod implementations */
 
 /* initialize the gscreamtx's class */
 static void
-gst_g_scream_tx_class_init (GstgScreamTxClass * klass)
+gst_g_scream_tx_clas_init (GstgScreamTxClass * klass)
 {
   GObjectClass *gobject_class;
   GstElementClass *gstelement_class;
@@ -141,6 +134,8 @@ gst_g_scream_tx_class_init (GstgScreamTxClass * klass)
       gst_static_pad_template_get (&src_factory));
   gst_element_class_add_pad_template (gstelement_class,
       gst_static_pad_template_get (&sink_factory));
+  //bind_communication (GST_ELEMENT (scream));
+
 }
 
 /* initialize the new element
@@ -149,35 +144,38 @@ gst_g_scream_tx_class_init (GstgScreamTxClass * klass)
  * initialize instance structure
  */
 static void
-gst_g_scream_tx_init (GstgScreamTx * filter)
+gst_g_scream_tx_init (GstgScreamTx * scream)
 {
-  filter->sinkpad = gst_pad_new_from_static_template (&sink_factory, "sink");
-  gst_pad_set_event_function (filter->sinkpad,
-                              GST_DEBUG_FUNCPTR(gst_g_scream_tx_sink_event));
-  gst_pad_set_chain_function (filter->sinkpad,
-                              GST_DEBUG_FUNCPTR(gst_g_scream_tx_chain));
-  GST_PAD_SET_PROXY_CAPS (filter->sinkpad);
-  gst_element_add_pad (GST_ELEMENT (filter), filter->sinkpad);
-
-  filter->srcpad = gst_pad_new_from_static_template (&src_factory, "src");
-  GST_PAD_SET_PROXY_CAPS (filter->srcpad);
-  gst_element_add_pad (GST_ELEMENT (filter), filter->srcpad);
-
   ScreamTx *screamTx = new ScreamTx();
   screamTx->assertWorking();
 
-  filter->silent = TRUE;
+  scream->sinkpad = gst_pad_new_from_static_template (&sink_factory, "sink");
+
+  gst_pad_set_event_function (scream->sinkpad,
+                              GST_DEBUG_FUNCPTR(gst_g_scream_tx_sink_event));
+
+  gst_pad_set_chain_function (scream->sinkpad,
+                              GST_DEBUG_FUNCPTR(gst_g_scream_tx_chain));
+
+  GST_PAD_SET_PROXY_CAPS (scream->sinkpad);
+  gst_element_add_pad (GST_ELEMENT (scream), scream->sinkpad);
+
+  scream->srcpad = gst_pad_new_from_static_template (&src_factory, "src");
+  GST_PAD_SET_PROXY_CAPS (scream->srcpad);
+  gst_element_add_pad (GST_ELEMENT (scream), scream->srcpad);
+
+  scream->silent = TRUE;
 }
 
 static void
 gst_g_scream_tx_set_property (GObject * object, guint prop_id,
     const GValue * value, GParamSpec * pspec)
 {
-  GstgScreamTx *filter = GST_GSCREAMTX (object);
+  GstgScreamTx *scream = GST_GSCREAMTX (object);
 
   switch (prop_id) {
     case PROP_SILENT:
-      filter->silent = g_value_get_boolean (value);
+      scream->silent = g_value_get_boolean (value);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -189,11 +187,11 @@ static void
 gst_g_scream_tx_get_property (GObject * object, guint prop_id,
     GValue * value, GParamSpec * pspec)
 {
-  GstgScreamTx *filter = GST_GSCREAMTX (object);
+  GstgScreamTx *scream = GST_GSCREAMTX (object);
 
   switch (prop_id) {
     case PROP_SILENT:
-      g_value_set_boolean (value, filter->silent);
+      g_value_set_boolean (value, scream->silent);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -207,12 +205,12 @@ gst_g_scream_tx_get_property (GObject * object, guint prop_id,
 static gboolean
 gst_g_scream_tx_sink_event (GstPad * pad, GstObject * parent, GstEvent * event)
 {
-  GstgScreamTx *filter;
+  GstgScreamTx *scream;
   gboolean ret;
 
-  filter = GST_GSCREAMTX (parent);
+  scream = GST_GSCREAMTX (parent);
 
-  GST_LOG_OBJECT (filter, "Received %s event: %", GST_PTR_FORMAT,
+  GST_LOG_OBJECT (scream, "Received %s event: %", GST_PTR_FORMAT,
       GST_EVENT_TYPE_NAME (event), event);
 
   switch (GST_EVENT_TYPE (event)) {
@@ -240,15 +238,18 @@ gst_g_scream_tx_sink_event (GstPad * pad, GstObject * parent, GstEvent * event)
 static GstFlowReturn
 gst_g_scream_tx_chain (GstPad * pad, GstObject * parent, GstBuffer * buf)
 {
-  GstgScreamTx *filter;
+  GstgScreamTx *scream = GST_GSCREAMTX (parent);
 
-  filter = GST_GSCREAMTX (parent);
+  scream = GST_GSCREAMTX (parent);
 
-  if (filter->silent == FALSE)
-    g_print ("I'm plugged, therefore I'm in.\n");
+  if (scream->silent == FALSE)
+  g_print ("Have data of size %" G_GSIZE_FORMAT" bytes!\n",
+      gst_buffer_get_size (buf));
 
-  /* just push out the incoming buffer without touching it */
-  return gst_pad_push (filter->srcpad, buf);
+  //Här bör buf, som bör vara i rtpform, matas in i rtpqueue som huvuduppgift.
+
+  return gst_pad_push (scream->srcpad, buf);
+  // Detta ^ bör ske i en annan tråd som kontinuerligt tar data ifrån rtpqueue och skickar datat till udpsocket.
 }
 
 
@@ -270,6 +271,100 @@ gscreamtx_init (GstPlugin * gscreamtx)
       GST_TYPE_GSCREAMTX);
 }
 
+
+/**
+* ------- GSCReAM FUNCTIONS -------
+*/
+
+static GstElement *
+bind_communication (GstElement * scream)
+{
+  GstElement *pipeline, *rtpbin, *audiosrc, *audio_encoder,
+      *audio_rtppayloader, *sendrtp_udpsink,
+      *send_rtcp_udpsink, *sendrtcp_funnel, *sendrtp_funnel;
+  GstElement *videosrc, *video_rtppayloader, *time_overlay;
+  gint rtp_udp_port = 5001;
+  gint rtcp_udp_port = 5002;
+  gint recv_audio_rtcp_port = 5003;
+  gint recv_video_rtcp_port = 5004;
+  GstElement *audio_rtcp_udpsrc, *video_rtcp_udpsrc;
+
+  pipeline = gst_pipeline_new (NULL);
+
+  rtpbin = gst_element_factory_make ("rtpbin", NULL);
+
+  audiosrc = gst_element_factory_make ("audiotestsrc", NULL);
+  g_object_set (audiosrc, "is-live", TRUE, NULL);
+  audio_encoder = gst_element_factory_make ("alawenc", NULL);
+  audio_rtppayloader = gst_element_factory_make ("rtppcmapay", NULL);
+  g_object_set (audio_rtppayloader, "pt", 96, NULL);
+
+  videosrc = gst_element_factory_make ("videotestsrc", NULL);
+  g_object_set (videosrc, "is-live", TRUE, NULL);
+  time_overlay = gst_element_factory_make ("timeoverlay", NULL);
+  video_rtppayloader = gst_element_factory_make ("rtpvrawpay", NULL);
+  g_object_set (video_rtppayloader, "pt", 100, NULL);
+
+  /* muxed rtcp */
+  sendrtcp_funnel = gst_element_factory_make ("funnel", "send_rtcp_funnel");
+  send_rtcp_udpsink = gst_element_factory_make ("udpsink", NULL);
+  g_object_set (send_rtcp_udpsink, "host", "127.0.0.1", NULL);
+  g_object_set (send_rtcp_udpsink, "port", rtcp_udp_port, NULL);
+  g_object_set (send_rtcp_udpsink, "sync", FALSE, NULL);
+  g_object_set (send_rtcp_udpsink, "async", FALSE, NULL);
+
+  /* outgoing bundled stream */
+  sendrtp_funnel = gst_element_factory_make ("funnel", "send_rtp_funnel");
+  sendrtp_udpsink = gst_element_factory_make ("udpsink", NULL);
+  g_object_set (sendrtp_udpsink, "host", "127.0.0.1", NULL);
+  g_object_set (sendrtp_udpsink, "port", rtp_udp_port, NULL);
+  g_object_set (sendrtp_udpsink, "sync", FALSE, NULL);
+  g_object_set (sendrtp_udpsink, "async", FALSE, NULL);
+
+  gst_bin_add_many (GST_BIN (pipeline), rtpbin, audiosrc, audio_encoder,
+      audio_rtppayloader, sendrtp_udpsink, send_rtcp_udpsink,
+      sendrtp_funnel, sendrtcp_funnel, videosrc, video_rtppayloader, NULL);
+
+  if (time_overlay)
+    gst_bin_add (GST_BIN (pipeline), time_overlay);
+
+  gst_element_link_many (audiosrc, audio_encoder, audio_rtppayloader, NULL);
+  gst_element_link_pads (audio_rtppayloader, "src", rtpbin, "send_rtp_sink_0");
+
+  if (time_overlay) {
+    gst_element_link_many (videosrc, time_overlay, video_rtppayloader, NULL);
+  } else {
+    gst_element_link (videosrc, video_rtppayloader);
+  }
+
+  gst_element_link_pads (video_rtppayloader, "src", rtpbin, "send_rtp_sink_1");
+
+  gst_element_link_pads (sendrtp_funnel, "src", sendrtp_udpsink, "sink");
+  gst_element_link_pads (rtpbin, "send_rtp_src_0", sendrtp_funnel, "sink_%u");
+  gst_element_link_pads (rtpbin, "send_rtp_src_1", sendrtp_funnel, "sink_%u");
+  gst_element_link_pads (sendrtcp_funnel, "src", send_rtcp_udpsink, "sink");
+  gst_element_link_pads (rtpbin, "send_rtcp_src_0", sendrtcp_funnel, "sink_%u");
+  gst_element_link_pads (rtpbin, "send_rtcp_src_1", sendrtcp_funnel, "sink_%u");
+
+  audio_rtcp_udpsrc = gst_element_factory_make ("udpsrc", NULL);
+  g_object_set (audio_rtcp_udpsrc, "port", recv_audio_rtcp_port, NULL);
+
+  video_rtcp_udpsrc = gst_element_factory_make ("udpsrc", NULL);
+  g_object_set (video_rtcp_udpsrc, "port", recv_video_rtcp_port, NULL);
+
+
+  gst_bin_add_many (GST_BIN (pipeline), audio_rtcp_udpsrc, video_rtcp_udpsrc,
+      NULL);
+  gst_element_link_pads (audio_rtcp_udpsrc, "src", rtpbin, "recv_rtcp_sink_0");
+  gst_element_link_pads (video_rtcp_udpsrc, "src", rtpbin, "recv_rtcp_sink_1");
+
+
+  gst_element_link_pads (scream, "src", rtpbin, "recv_rtcp_sink_0");
+
+  return pipeline;
+}
+
+
 /* PACKAGE: this is usually set by autotools depending on some _INIT macro
  * in configure.ac and then written into and defined in config.h, but we can
  * just set it ourselves here in case someone doesn't use autotools to
@@ -283,14 +378,8 @@ gscreamtx_init (GstPlugin * gscreamtx)
  *
  * exchange the string 'Template gscreamtx' with your gscreamtx description
  */
-GST_PLUGIN_DEFINE (
-    GST_VERSION_MAJOR,
-    GST_VERSION_MINOR,
-    gscreamtx,
-    "Template gscreamtx",
-    gscreamtx_init,
-    VERSION,
-    "LGPL",
-    "GStreamer",
-    "http://gstreamer.net/"
-)
+ GST_PLUGIN_DEFINE(GST_VERSION_MAJOR, GST_VERSION_MINOR, scream,
+                   "Congestion control using the SCReAM algorithm. Developed by "
+                   "LTU students for Ericsson.",
+                   gscreamtx_init, VERSION, "LGPL", "GStreamer",
+                   "http://gstreamer.net/")
