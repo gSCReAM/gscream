@@ -93,7 +93,10 @@ static GstStaticPadTemplate src_factory = GST_STATIC_PAD_TEMPLATE ("src",
     GST_STATIC_CAPS ("ANY")
     );
 
-static GstElement *
+static void task_print_loop();
+
+
+static void
     bind_communication (GstElement * scream);
 
 #define gst_g_scream_tx_parent_class parent_class

@@ -69,7 +69,7 @@ Vårt problem:
   - Vi har inte försökt så mycket än. Så det mesta.
 
 Prio för tillfället: Uppgift 1. Huvudproblemet är just att koppla pipelinen till individuella element. Kan vi fixa det så kan vi förmodligen fixa
-resten själva. 
+resten själva.
 
 */
 
@@ -78,9 +78,7 @@ resten själva.
 #endif
 
 #include <gst/gst.h>
-
 #include "gstgscreamtx.h"
-
 #include "ScreamTx.h"
 
 GST_DEBUG_CATEGORY_STATIC (gst_g_scream_tx_debug);
@@ -109,7 +107,7 @@ enum
 
 /* initialize the gscreamtx's class */
 static void
-gst_g_scream_tx_clas_init (GstgScreamTxClass * klass)
+gst_g_scream_tx_class_init (GstgScreamTxClass * klass)
 {
   GObjectClass *gobject_class;
   GstElementClass *gstelement_class;
@@ -134,8 +132,6 @@ gst_g_scream_tx_clas_init (GstgScreamTxClass * klass)
       gst_static_pad_template_get (&src_factory));
   gst_element_class_add_pad_template (gstelement_class,
       gst_static_pad_template_get (&sink_factory));
-  //bind_communication (GST_ELEMENT (scream));
-
 }
 
 /* initialize the new element
@@ -165,6 +161,8 @@ gst_g_scream_tx_init (GstgScreamTx * scream)
   gst_element_add_pad (GST_ELEMENT (scream), scream->srcpad);
 
   scream->silent = TRUE;
+
+  //bind_communication (GST_ELEMENT (scream));
 }
 
 static void
@@ -235,6 +233,11 @@ gst_g_scream_tx_sink_event (GstPad * pad, GstObject * parent, GstEvent * event)
 /* chain function
  * this function does the actual processing
  */
+
+int once = 0;
+GstTask *task1;
+GRecMutex *mutex1;
+
 static GstFlowReturn
 gst_g_scream_tx_chain (GstPad * pad, GstObject * parent, GstBuffer * buf)
 {
@@ -248,8 +251,23 @@ gst_g_scream_tx_chain (GstPad * pad, GstObject * parent, GstBuffer * buf)
 
   //Här bör buf, som bör vara i rtpform, matas in i rtpqueue som huvuduppgift.
 
-  return gst_pad_push (scream->srcpad, buf);
+  if(once < 1){
+    task1 = gst_task_new((GstTaskFunction)task_print_loop, NULL, NULL);
+    gst_task_set_lock(task1, mutex1);
+    gst_task_start(task1);
+
+    g_print("Task started");
+  }else if (once >5) {
+    gst_task_stop(task1);
+  }
+
+  once++;
+  //return gst_pad_push (scream->srcpad, buf);
   // Detta ^ bör ske i en annan tråd som kontinuerligt tar data ifrån rtpqueue och skickar datat till udpsocket.
+}
+
+static void task_print_loop(){
+  g_print("Im inside task print loop");
 }
 
 
@@ -276,34 +294,19 @@ gscreamtx_init (GstPlugin * gscreamtx)
 * ------- GSCReAM FUNCTIONS -------
 */
 
-static GstElement *
+static void
 bind_communication (GstElement * scream)
 {
-  GstElement *pipeline, *rtpbin, *audiosrc, *audio_encoder,
-      *audio_rtppayloader, *sendrtp_udpsink,
+  GstElement *rtpbin, *sendrtp_udpsink, *video_rtcp_udpsrc,
       *send_rtcp_udpsink, *sendrtcp_funnel, *sendrtp_funnel;
-  GstElement *videosrc, *video_rtppayloader, *time_overlay;
+  GstElement *videosrc;
   gint rtp_udp_port = 5001;
   gint rtcp_udp_port = 5002;
-  gint recv_audio_rtcp_port = 5003;
   gint recv_video_rtcp_port = 5004;
-  GstElement *audio_rtcp_udpsrc, *video_rtcp_udpsrc;
-
-  pipeline = gst_pipeline_new (NULL);
 
   rtpbin = gst_element_factory_make ("rtpbin", NULL);
 
-  audiosrc = gst_element_factory_make ("audiotestsrc", NULL);
-  g_object_set (audiosrc, "is-live", TRUE, NULL);
-  audio_encoder = gst_element_factory_make ("alawenc", NULL);
-  audio_rtppayloader = gst_element_factory_make ("rtppcmapay", NULL);
-  g_object_set (audio_rtppayloader, "pt", 96, NULL);
-
-  videosrc = gst_element_factory_make ("videotestsrc", NULL);
-  g_object_set (videosrc, "is-live", TRUE, NULL);
-  time_overlay = gst_element_factory_make ("timeoverlay", NULL);
-  video_rtppayloader = gst_element_factory_make ("rtpvrawpay", NULL);
-  g_object_set (video_rtppayloader, "pt", 100, NULL);
+  g_print("Stop being annoying1 \n");
 
   /* muxed rtcp */
   sendrtcp_funnel = gst_element_factory_make ("funnel", "send_rtcp_funnel");
@@ -321,49 +324,38 @@ bind_communication (GstElement * scream)
   g_object_set (sendrtp_udpsink, "sync", FALSE, NULL);
   g_object_set (sendrtp_udpsink, "async", FALSE, NULL);
 
-  gst_bin_add_many (GST_BIN (pipeline), rtpbin, audiosrc, audio_encoder,
-      audio_rtppayloader, sendrtp_udpsink, send_rtcp_udpsink,
-      sendrtp_funnel, sendrtcp_funnel, videosrc, video_rtppayloader, NULL);
-
-  if (time_overlay)
-    gst_bin_add (GST_BIN (pipeline), time_overlay);
-
-  gst_element_link_many (audiosrc, audio_encoder, audio_rtppayloader, NULL);
-  gst_element_link_pads (audio_rtppayloader, "src", rtpbin, "send_rtp_sink_0");
-
-  if (time_overlay) {
-    gst_element_link_many (videosrc, time_overlay, video_rtppayloader, NULL);
-  } else {
-    gst_element_link (videosrc, video_rtppayloader);
-  }
-
-  gst_element_link_pads (video_rtppayloader, "src", rtpbin, "send_rtp_sink_1");
+  gst_bin_add_many (GST_BIN(rtpbin), sendrtp_udpsink, send_rtcp_udpsink,
+      sendrtp_funnel, sendrtcp_funnel, videosrc, NULL);
 
   gst_element_link_pads (sendrtp_funnel, "src", sendrtp_udpsink, "sink");
   gst_element_link_pads (rtpbin, "send_rtp_src_0", sendrtp_funnel, "sink_%u");
-  gst_element_link_pads (rtpbin, "send_rtp_src_1", sendrtp_funnel, "sink_%u");
   gst_element_link_pads (sendrtcp_funnel, "src", send_rtcp_udpsink, "sink");
+  g_print("Stop being annoying2 \n");
   gst_element_link_pads (rtpbin, "send_rtcp_src_0", sendrtcp_funnel, "sink_%u");
-  gst_element_link_pads (rtpbin, "send_rtcp_src_1", sendrtcp_funnel, "sink_%u");
-
-  audio_rtcp_udpsrc = gst_element_factory_make ("udpsrc", NULL);
-  g_object_set (audio_rtcp_udpsrc, "port", recv_audio_rtcp_port, NULL);
+  g_print("Stop being annoying3 \n");
 
   video_rtcp_udpsrc = gst_element_factory_make ("udpsrc", NULL);
   g_object_set (video_rtcp_udpsrc, "port", recv_video_rtcp_port, NULL);
 
-
-  gst_bin_add_many (GST_BIN (pipeline), audio_rtcp_udpsrc, video_rtcp_udpsrc,
-      NULL);
-  gst_element_link_pads (audio_rtcp_udpsrc, "src", rtpbin, "recv_rtcp_sink_0");
+  //gst_bin_add_many (GST_BIN (pipeline), audio_rtcp_udpsrc, video_rtcp_udpsrc,NULL);
   gst_element_link_pads (video_rtcp_udpsrc, "src", rtpbin, "recv_rtcp_sink_1");
 
+  GstPad *pad;
+  GstElement *sink, *src;
 
-  gst_element_link_pads (scream, "src", rtpbin, "recv_rtcp_sink_0");
+  /* add ghostpad */
+  pad = gst_element_get_static_pad (sink, "sink");
+  gst_element_add_pad (rtpbin, gst_ghost_pad_new ("rtpbin_ghostpad_sink", pad));
+  gst_object_unref (GST_OBJECT (pad));
 
-  return pipeline;
+  pad = gst_element_get_static_pad (src, "src");
+  gst_element_add_pad (rtpbin, gst_ghost_pad_new ("rtpbin_ghostpad_src", pad));
+  gst_object_unref (GST_OBJECT (pad));
+
+  gst_element_link_pads (scream, "src", rtpbin, "rtpbin_ghostpad_sink");
+  gst_element_link_pads (scream, "src", rtpbin, "rtpbin_ghostpad_src");
+
 }
-
 
 /* PACKAGE: this is usually set by autotools depending on some _INIT macro
  * in configure.ac and then written into and defined in config.h, but we can
