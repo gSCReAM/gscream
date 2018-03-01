@@ -6,10 +6,10 @@ g++ -Wall gscream_app_rx.cpp -o gscream_app_rx $(pkg-config --cflags --libs gstr
 
 
 run send:
-./send /dev/video0 127.0.0.1 5200
+./gscream_app_tx /dev/video0 127.0.0.1 5200
 
 run recv:
-./recv 5200
+./gscream_app_rx 5200
 
 both send and recv can generate .dot files for pipeline visualisation
 

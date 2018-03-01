@@ -1,5 +1,0 @@
-make executable
-chmod +x 
-
-create symlink to /etc/profile.d/
-sudo ln -s setPluginEnv /etc/profile.d/setPluginEnv
