@@ -1,18 +1,18 @@
 ### Build
- * gscream_app_tx
+* gscream_app_tx
 
     ```$ g++ -Wall gscream_app_tx.cpp -o gscream_app_tx $(pkg-config --cflags --libs gstreamer-1.0)```
 
- * gscream_app_rx
+* gscream_app_rx
 
   ```$ g++ -Wall gscream_app_rx.cpp -o gscream_app_rx $(pkg-config --cflags --libs gstreamer-1.0)```
 
 ### Running application
- * gscream_app_tx
+* gscream_app_tx
 
  ```$ ./gscream_app_tx /dev/video0 127.0.0.1 5200```
 
- * gscream_app_rx
+* gscream_app_rx
 
  ```$ ./gscream_app_rx 5200```
 
