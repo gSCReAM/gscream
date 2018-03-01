@@ -109,7 +109,7 @@ int main (int argc, char *argv[])
                     udpsrcm, rtpdepaym, decodebinm, videoconvertm, autovideosinkm, NULL);
 
   /* we link the elements together */
-  /* videotestsrcm -> autovideosinkm */
+  /* videotestsrc -> autovideosinkm */
 
   if(!gst_element_link_many (udpsrcm, rtpdepaym, decodebinm, NULL)){
     g_error("Could not link on ore more of elements udpsrc, rtpdepay decodebin");

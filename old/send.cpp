@@ -68,7 +68,7 @@ int main (int argc, char *argv[])
 
   /* Create gstreamer elements */
   pipeline = gst_pipeline_new ("video-pipeline");
-  //videotestsrcm   = gst_element_factory_make ("videotestsrc", "testsource");
+  //videotestsrc   = gst_element_factory_make ("videotestsrc", "testsource");
   videosrcm = gst_element_factory_make ("v4l2src", "video4linux2");
   capsfilterm = gst_element_factory_make ("capsfilter", "capsfilter");
   videoconvertm   = gst_element_factory_make ("videoconvert", "convert");
@@ -107,7 +107,7 @@ int main (int argc, char *argv[])
                     videosrcm, capsfilterm, videoconvertm, videoencodem, videopayloadm, udpsrcm, NULL);
 
   /* we link the elements together */
-  /* videotestsrcm -> autovideosinkm */
+  /* videotestsrc -> autovideosinkm */
   gst_element_link_many (videosrcm, capsfilterm, videoconvertm, videoencodem, videopayloadm, udpsrcm, NULL);
 
   GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, "send-pipeline-bf-playing");

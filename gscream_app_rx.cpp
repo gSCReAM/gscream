@@ -47,7 +47,7 @@ int main (int argc, char *argv[])
   const char *srcport="port=5000";
   GMainLoop *loop;
 
-  GstElement *pipeline, /*videotestsrcm,*/ *udpsrcm, *rtpdepaym, *queuem, *decodebinm, *videoconvertm, *autovideosinkm;
+  GstElement *pipeline, /*videotestsrc,*/ *udpsrcm, *rtpdepaym, *queuem, *decodebinm, *videoconvertm, *autovideosinkm;
   GstBus *bus;
   guint bus_watch_id;
 
@@ -61,8 +61,8 @@ int main (int argc, char *argv[])
   //std::string tt = "device="+argv[1];
   /* Create gstreamer elements */
   pipeline = gst_pipeline_new ("videotest-pipeline");
-  //videotestsrcm   = gst_element_factory_make ("videotestsrc", "testsource");
-  //videotestsrcm = gst_element_factory_make ("v4l2src", charvideosrc);
+  //videotestsrc   = gst_element_factory_make ("videotestsrc", "testsource");
+  //videotestsrc = gst_element_factory_make ("v4l2src", charvideosrc);
   udpsrcm = gst_element_factory_make("udpsrc",srcport);
   rtpdepaym = gst_element_factory_make("rtph264depay", "rtph264depay");
   queuem = gst_element_factory_make ("queue", "queue");
@@ -72,7 +72,7 @@ int main (int argc, char *argv[])
   autovideosinkm = gst_element_factory_make ("autovideosink", "videosink");
 // gst-launch-1.0 udpsrc port=5200 caps="application/x-rtp, media=video, encoding-name=H264" ! rtph264depay ! queue ! decodebin ! videoconvert ! autovideosink
 
-  /*if (!pipeline || !videotestsrcm || !autovideosinkm) {
+  /*if (!pipeline || !videotestsrc || !autovideosinkm) {
     g_printerr ("One element could not be created. Exiting.\n");
     return -1;
   }*/
@@ -102,7 +102,7 @@ int main (int argc, char *argv[])
 
   /* we add all elements into the pipeline */
   //gst_bin_add_many (GST_BIN (pipeline),
-  //                  videotestsrcm, autovideosinkm, NULL);
+  //                  videotestsrc, autovideosinkm, NULL);
 
   //gst_bin_add_many (GST_BIN (pipeline),
   //                  udpsrcm, autovideosinkm, NULL);
@@ -112,8 +112,8 @@ int main (int argc, char *argv[])
                     udpsrcm, rtpdepaym, decodebinm, videoconvertm, autovideosinkm, NULL);
 
   /* we link the elements together */
-  /* videotestsrcm -> autovideosinkm */
-  //gst_element_link (videotestsrcm, autovideosinkm);
+  /* videotestsrc -> autovideosinkm */
+  //gst_element_link (videotestsrc, autovideosinkm);
   //gst_element_link (udpsrcm, autovideosinkm);
 
   gst_element_link_many (udpsrcm, rtpdepaym, decodebinm, videoconvertm, autovideosinkm, NULL);

@@ -1,8 +1,8 @@
 build send with:
-g++ -Wall send.cpp -o send $(pkg-config --cflags --libs gstreamer-1.0)
+g++ -Wall gscream_app_tx.cpp -o gscream_app_tx $(pkg-config --cflags --libs gstreamer-1.0)
 
 build recv with:
-g++ -Wall recv.cpp -o recv $(pkg-config --cflags --libs gstreamer-1.0)
+g++ -Wall gscream_app_rx.cpp -o gscream_app_rx $(pkg-config --cflags --libs gstreamer-1.0)
 
 
 run send:
@@ -10,7 +10,6 @@ run send:
 
 run recv:
 ./recv 5200
-
 
 both send and recv can generate .dot files for pipeline visualisation
 
@@ -25,7 +24,6 @@ to convert .dot file to png run
 dot -Tpng filename.dot > filename.png
 
 graphviz is required to convert the dot files.
-
 
 to create dot files from pipeline for debug run
 GST_DEBUG_DUMP_DOT_DIR=. pipeline...
