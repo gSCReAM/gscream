@@ -81,6 +81,36 @@ struct _GstgScreamTxClass
 
 GType gst_g_scream_tx_get_type (void);
 
+static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE ("sink",
+    GST_PAD_SINK,
+    GST_PAD_ALWAYS,
+    GST_STATIC_CAPS ("ANY")
+    );
+
+static GstStaticPadTemplate src_factory = GST_STATIC_PAD_TEMPLATE ("src",
+    GST_PAD_SRC,
+    GST_PAD_ALWAYS,
+    GST_STATIC_CAPS ("ANY")
+    );
+
+static void task_print_loop();
+
+
+static void
+    bind_communication (GstElement * scream);
+
+#define gst_g_scream_tx_parent_class parent_class
+G_DEFINE_TYPE (GstgScreamTx, gst_g_scream_tx, GST_TYPE_ELEMENT);
+
+static void gst_g_scream_tx_set_property (GObject * object, guint prop_id,
+    const GValue * value, GParamSpec * pspec);
+static void gst_g_scream_tx_get_property (GObject * object, guint prop_id,
+    GValue * value, GParamSpec * pspec);
+
+static gboolean gst_g_scream_tx_sink_event (GstPad * pad, GstObject * parent, GstEvent * event);
+static GstFlowReturn gst_g_scream_tx_chain (GstPad * pad, GstObject * parent, GstBuffer * buf);
+
+
 G_END_DECLS
 
 #endif /* __GST_GSCREAMTX_H__ */

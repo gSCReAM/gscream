@@ -1,5 +1,0 @@
-{ global:
-gst_plugin_scream_get_desc;
-gst_plugin_scream_register;
-gst_scream_get_type;
-local: *; };
