@@ -1,0 +1,21 @@
+__tim
+__tim [__tim!~tpm@dsl-217-155-195-89.zen.co.uk] * Tim-Philipp Muller
+Channels: #gstreamer
+Connected to server: hitchcock.freenode.net Sofia, BG, EU
+Using a secure connection
+Idle for 00:04:16, signed on 02/23/2018
+Logged in as __tim
+__tim
+ok, so the problem is not with the pipeline but with the application
+you can try checking the debug log GST_DEBUG=*:LOG ./yourapp 2>&1 | grep -i error
+→ Mathieu_Du has joined
+__tim
+or GST_DEBUG=*:LOG ./yourapp 2>&1 | grep -i flow
+I suspect it will be not-linked
+line 119 looks not quite right, the link between decodebin + x264enc will fail at that point, because there are no pads yet
+on decodebin
+you will handle that via the pad-added signal
+but the side effect is that the bits afterwards also don't get linked
+so you need to do two gst_element_link_many(), one for source, decodebin, NULL  and one for x264enc, ...udpsink, NULL
+and then the pad added callback bridges the gap between decodebin + x264enc [or better videoconvert]
+also check the gst_pad_link return value (note that it's an enum not a bool)
