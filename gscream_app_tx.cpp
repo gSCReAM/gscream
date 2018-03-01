@@ -39,47 +39,61 @@ static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data)
 
 int main (int argc, char *argv[])
 {
-  g_printerr("Hej");
-  std::string pavideosrc = "";
-  if(argv[1] != NULL){
-    pavideosrc.append(argv[1]);
-    const char *charvideosrc = pavideosrc.c_str();
-    std::printf("going for video at: %s\n",charvideosrc);
-  }else{
-    std::printf("No video source found.");
-  }
-  GMainLoop *loop;
+  g_printerr(" \n --- Initializing gscream_app_tx \n");
 
-  GstElement *pipeline, *videotestsrc, *udpsrc, *videoconvert, *videoencode, *videopayload, *autovideosink, *gscreamtx;
+  if(argc < 4){
+    std::cout << "Usage: " << argv[0] << " videosrc ip(recieving) port" << std::endl;
+    std::cout << "Example: " << argv[0] << " /dev/video0 127.0.0.1 5000   sends the video stream to localhost on port 5000" << std::endl;
+    return -1;
+  }
+
+  std::printf("Sending video from source: %s to ip: %s port %i\n",argv[1], argv[2],std::atoi(argv[3]));
+
+
+  GMainLoop *loop;
+  GstElement *pipeline, *videosrc, *udpsrc, *videoconvert, *capsfilter,
+   *videoencode, *videopayload, *autovideosink, *gscreamtx;
   GstBus *bus;
   guint bus_watch_id;
+  GstCaps *capsfiltercaps;
 
   /* Initialisation */
-  //gst_init (&argc, &argv);
+  gst_init (&argc, &argv);
 
   loop = g_main_loop_new (NULL, FALSE);
 
   /* Create gstreamer elements */
   pipeline = gst_pipeline_new ("videotest-pipeline");
-  //videotestsrc   = gst_element_factory_make ("videotestsrc", "testsource");
 
   /*Main imports*/
-  videotestsrc    = gst_element_factory_make ("v4l2src",        "video4linux2");
+  videosrc        = gst_element_factory_make ("v4l2src",        "video4linux2");
   videoconvert    = gst_element_factory_make ("videoconvert",   "convert");
+  capsfilter      = gst_element_factory_make ("capsfilter",     "capsfilter");
   videoencode     = gst_element_factory_make ("x264enc",        "encode");
   videopayload    = gst_element_factory_make ("rtph264pay",     "payload");
-  gscreamtx       = gst_element_factory_make ("gscreamtx",      "gscream-transmit-cc");
+  //gscreamtx       = gst_element_factory_make ("gscreamtx",      "gscream-transmit-cc");
   udpsrc          = gst_element_factory_make ("udpsink",        "udpsink");
 
   /* Optional imports*/
   autovideosink  = gst_element_factory_make ("autovideosink",  "videosink");
-  g_object_set(G_OBJECT(udpsrc), "host", "127.0.0.1", "port", 5200, NULL);
 
-  //gst-launch-1.0 -v videotestsrc ! videoconvert ! x264enc ! rtph264pay ! udpsink host=127.0.0.1 port=5200
-  if (!pipeline || !videotestsrc || !videoconvert || !videoencode || !videopayload || !autovideosink) {
+  if (!pipeline || !videosrc || !videoconvert || !capsfilter || !videoencode || !videopayload || !autovideosink) {
     g_printerr ("One element could not be created. Exiting.\n");
     return -1;
   }
+
+  /* Setting element properties*/
+  g_object_set  (G_OBJECT(videosrc), "device", argv[1], NULL);
+  g_object_set  (G_OBJECT(udpsrc), "host", argv[2], "port", std::atoi(argv[3]), NULL);
+
+  capsfiltercaps = gst_caps_new_simple ("video/x-raw",
+      "width", G_TYPE_INT, 1280,
+      "height", G_TYPE_INT, 720,
+      NULL);
+  g_object_set (G_OBJECT(capsfilter), "caps",  capsfiltercaps, NULL);
+
+
+
 
   /* Set up the pipeline */
 
@@ -90,17 +104,17 @@ int main (int argc, char *argv[])
 
 
   /* we add all elements into the pipeline */
-
   gst_bin_add_many (GST_BIN (pipeline),
-                    videotestsrc, videoconvert, videoencode, videopayload, autovideosink, NULL);
+                    videosrc, capsfilter, videoconvert, videoencode, videopayload, udpsrc, NULL);
 
   /* we link the elements together */
-  gst_element_link_many (videotestsrc, videoconvert, videoencode, videopayload, autovideosink, NULL);
+  gst_element_link_many (videosrc, capsfilter, videoconvert, videoencode, videopayload, udpsrc, NULL);
 
   /* Set the pipeline to "playing" state*/
   g_print ("Now set pipeline in state playing\n");
   gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
+  GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, "send-pipeline-af-playing-bf-running");
 
   /* Iterate */
   g_print ("Running...\n");
@@ -110,6 +124,7 @@ int main (int argc, char *argv[])
   /* Out of the main loop, clean up nicely */
   g_print ("Returned, stopping playback\n");
   gst_element_set_state (pipeline, GST_STATE_NULL);
+  GST_DEBUG_BIN_TO_DOT_FILE(GST_BIN(pipeline), GST_DEBUG_GRAPH_SHOW_ALL, "send-pipeline-af-stopping");
 
   g_print ("Deleting pipeline\n");
   gst_object_unref (GST_OBJECT (pipeline));
