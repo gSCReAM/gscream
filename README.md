@@ -10,11 +10,11 @@
 ### Running application
 * gscream_app_tx
 
- ```$ ./gscream_app_tx /dev/video0 127.0.0.1 5200```
+  ```$ ./gscream_app_tx /dev/video0 127.0.0.1 5200```
 
 * gscream_app_rx
 
- ```$ ./gscream_app_rx 5200```
+  ```$ ./gscream_app_rx 5200```
 
 ### Debug
 Both __gscream_app_tx__ and __gscream_app_rx__ can generate __.dot__ files for pipeline visualisation
