@@ -39,11 +39,15 @@ static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data)
 
 int main (int argc, char *argv[])
 {
-
+  g_print("Hej");
   std::string pavideosrc = "";
-  pavideosrc.append(argv[1]);
-  const char *charvideosrc = pavideosrc.c_str();
-  std::printf("going for video at: %s\n",charvideosrc);
+  if(argv[1] != NULL){
+    pavideosrc.append(argv[1]);
+    const char *charvideosrc = pavideosrc.c_str();
+    std::printf("going for video at: %s\n",charvideosrc);
+  }else{
+    std::printf("No video source found.");
+  }
   GMainLoop *loop;
 
   GstElement *pipeline, *videotestsrcm, *udpsrcm, *videoconvertm, *videoencodem, *videopayloadm, *autovideosinkm;
@@ -51,7 +55,7 @@ int main (int argc, char *argv[])
   guint bus_watch_id;
 
   /* Initialisation */
-  gst_init (&argc, &argv);
+  //gst_init (&argc, &argv);
 
   loop = g_main_loop_new (NULL, FALSE);
 
@@ -64,6 +68,7 @@ int main (int argc, char *argv[])
   videoconvertm   = gst_element_factory_make ("videoconvert", "convert");
   videoencodem   = gst_element_factory_make ("x264enc", "encode");
   videopayloadm   = gst_element_factory_make ("rtph264pay", "payload");
+
   udpsrcm = gst_element_factory_make("udpsink","udpsink");
   g_object_set(G_OBJECT(udpsrcm), "host", "127.0.0.1", "port", 5200, NULL);
   autovideosinkm = gst_element_factory_make ("autovideosink", "videosink");
@@ -72,7 +77,7 @@ int main (int argc, char *argv[])
     g_printerr ("One element could not be created. Exiting.\n");
     return -1;
   }*/
-  if (!pipeline || !videotestsrcm || !videoconvertm || !videoencodem || !videopayloadm || !udpsrcm) {
+  if (!pipeline || !videotestsrcm || !videoconvertm || !videoencodem || !videopayloadm || !autovideosinkm) {
     g_printerr ("One element could not be created. Exiting.\n");
     return -1;
   }
@@ -82,7 +87,10 @@ int main (int argc, char *argv[])
   //g_object_setv(G_OBJECT(videotestsrcm),1,"device", charvideosrc, NULL);
 
   //g_object_set(G_OBJECT(udpsrcm), "host", "127.0.0.1", "port", 5200, NULL);
-  g_object_set (G_OBJECT(videotestsrcm), "device", argv[1], NULL);
+
+  if(argv[1] != NULL){
+    g_object_set (G_OBJECT(videotestsrcm), "device", argv[1], NULL);
+  }
   /*g_object_set (G_OBJECT(videotestsrcm), "device",argv[1], "caps",
             gst_caps_new_simple ("video/x-raw",
                 "width", G_TYPE_INT, 1280,
@@ -103,13 +111,13 @@ int main (int argc, char *argv[])
   //                videotestsrcm, udpsrcm, NULL);
 
   gst_bin_add_many (GST_BIN (pipeline),
-                    videotestsrcm, videoconvertm, videoencodem, videopayloadm, udpsrcm, NULL);
+                    videotestsrcm, videoconvertm, videoencodem, videopayloadm, autovideosinkm, NULL);
 
   /* we link the elements together */
   /* videotestsrcm -> autovideosinkm */
   //gst_element_link (videotestsrcm, autovideosinkm);
   //gst_element_link (videotestsrcm, udpsrcm);
-  gst_element_link_many (videotestsrcm, videoconvertm, videoencodem, videopayloadm, udpsrcm, NULL);
+  gst_element_link_many (videotestsrcm, videoconvertm, videoencodem, videopayloadm, autovideosinkm, NULL);
 
   /* Set the pipeline to "playing" state*/
   g_print ("Now set pipeline in state playing\n");
