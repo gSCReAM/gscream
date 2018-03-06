@@ -45,7 +45,7 @@
 
 
 /*
-    ---- Nuvarande stadie ----
+    ---- Nuvarande stadie ----s
 
 
 Uppgift 1: Vi vill kunna skicka RTC/RTCP paket samt manipulera dataströmmen för att implementera SCReAM.
@@ -119,7 +119,7 @@ gst_g_scream_tx_class_init (GstgScreamTxClass * klass)
   gobject_class->get_property = gst_g_scream_tx_get_property;
 
   g_object_class_install_property (gobject_class, PROP_SILENT,
-      g_param_spec_boolean ("silent", "Silent", "Produce verbose output ?",
+      g_param_spec_boolean ("silent", "Silent", "Produce verbose output?",
           FALSE, G_PARAM_READWRITE));
 
   gst_element_class_set_details_simple(gstelement_class,
@@ -158,7 +158,7 @@ gst_g_scream_tx_init (GstgScreamTx * scream)
 
   scream->srcpad = gst_pad_new_from_static_template (&src_factory, "src");
   GST_PAD_SET_PROXY_CAPS (scream->srcpad);
-  gst_element_add_pad (GST_ELEMENT (scream), scream->srcpad)
+  gst_element_add_pad (GST_ELEMENT (scream), scream->srcpad);
 
   scream->silent = TRUE;
 
@@ -252,48 +252,20 @@ gst_g_scream_tx_chain (GstPad * pad, GstObject * parent, GstBuffer * buf)
       gst_buffer_get_size (buf));
 
   //Här bör buf, som bör vara i rtpform, matas in i rtpqueue som huvuduppgift.
-
-  if(once < 1){
-    task1 = gst_task_new((GstTaskFunction)task_print_loop, NULL, NULL);
-
-    // g_print("Task started1 \n");
-    // g_rec_mutex_init(mutex1);
-    // g_print("Task started2 \n");
-
-    // gst_task_set_lock(task1, mutex1);
-    mutex.lock();
-    gst_task_start(task1);
-    mutex.unlock();
-
-    g_print("Task started \n");
-  }else if (once >5) {
-    gst_task_stop(task1);
-  }
+  // if(once < 1 && false){
+  //   task1 = gst_task_new((GstTaskFunction)task_print_loop, NULL, NULL);
+  //   gst_task_set_lock(task1, mutex1);
+  //   mutex.lock();
+  //   gst_task_start(task1);
+  //   mutex.unlock();
+  //
+  //   g_print("Task started \n");
+  // }else if (once >5) {
+  //   gst_task_stop(task1);
+  // }
 
   once++;
-  //return gst_pad_push (scream->srcpad, buf);
-  // Detta ^ bör ske i en annan tråd som kontinuerligt tar data ifrån rtpqueue och skickar datat till udpsocket.
-}
-  scream = GST_GSCREAMTX (parent);
-
-  if (scream->silent == FALSE)
-  g_print ("Have data of size %" G_GSIZE_FORMAT" bytes!\n",
-      gst_buffer_get_size (buf));
-
-  //Här bör buf, som bör vara i rtpform, matas in i rtpqueue som huvuduppgift.
-
-  if(once < 1){
-    task1 = gst_task_new((GstTaskFunction)task_print_loop, NULL, NULL);
-    gst_task_set_lock(task1, mutex1);
-    gst_task_start(task1);
-
-    g_print("Task started");
-  }else if (once >5) {
-    gst_task_stop(task1);
-  }
-
-  once++;
-  //return gst_pad_push (scream->srcpad, buf);
+  return gst_pad_push (scream->srcpad, buf);
   // Detta ^ bör ske i en annan tråd som kontinuerligt tar data ifrån rtpqueue och skickar datat till udpsocket.
 }
 
