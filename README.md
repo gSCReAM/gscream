@@ -16,6 +16,11 @@
 #### Remove gscream_app_rx and gscream_app_tx
 ```$ make uninstall```
 
+### Building with SCReAM code
+* In order to build using scream code you must uncomment the lines in the gscream_app_tx/rx and have gscream plugin installed
+* To install the gscream plugin follow the instructions in the  gst-gscreamtx folder, mimic this for gst-gscreamrx
+* Remember to *set the $GST_PLUGIN_PATH environmental variable to point at the .lib folder within the built element* using ```export GST_PLUGIN_PATH=$HOME/<YOUR PATH TO BUILT PLUGIN HERE>.libs:$GST_PLUGIN_PATH```
+
 ### Using commandline
 
 * gscream_app_tx
