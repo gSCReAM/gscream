@@ -71,13 +71,13 @@ int main (int argc, char *argv[])
   capsfilter      = gst_element_factory_make ("capsfilter",     "capsfilter");
   videoencode     = gst_element_factory_make ("x264enc",        "encode");
   videopayload    = gst_element_factory_make ("rtph264pay",     "payload");
-  //gscreamtx       = gst_element_factory_make ("gscreamtx",      "gscream-transmit-cc");
+  gscreamtx       = gst_element_factory_make ("gscreamtx",      "gscream-transmit-cc");
   udpsrc          = gst_element_factory_make ("udpsink",        "udpsink");
 
   /* Optional imports*/
   autovideosink  = gst_element_factory_make ("autovideosink",  "videosink");
 
-  if (!pipeline || !videosrc || !videoconvert || !capsfilter || !videoencode || !videopayload || !autovideosink) {
+  if (!pipeline || !videosrc || !videoconvert || !capsfilter || !videoencode || !videopayload || !udpsrc || !gscreamtx || !autovideosink) {
     g_printerr ("One element could not be created. Exiting.\n");
     return -1;
   }
@@ -87,8 +87,8 @@ int main (int argc, char *argv[])
   g_object_set  (G_OBJECT(udpsrc), "host", argv[2], "port", std::atoi(argv[3]), NULL);
 
   capsfiltercaps = gst_caps_new_simple ("video/x-raw",
-      "width", G_TYPE_INT, 1280,
-      "height", G_TYPE_INT, 720,
+      "width", G_TYPE_INT, 640,
+      "height", G_TYPE_INT, 480,
       NULL);
   g_object_set (G_OBJECT(capsfilter), "caps",  capsfiltercaps, NULL);
 
@@ -105,10 +105,10 @@ int main (int argc, char *argv[])
 
   /* we add all elements into the pipeline */
   gst_bin_add_many (GST_BIN (pipeline),
-                    videosrc, capsfilter, videoconvert, videoencode, videopayload, udpsrc, NULL);
+                    videosrc, capsfilter, videoconvert, videoencode, videopayload, gscreamtx, udpsrc, NULL);
 
   /* we link the elements together */
-  gst_element_link_many (videosrc, capsfilter, videoconvert, videoencode, videopayload, udpsrc, NULL);
+  gst_element_link_many (videosrc, capsfilter, videoconvert, videoencode, videopayload, gscreamtx, udpsrc, NULL);
 
   /* Set the pipeline to "playing" state*/
   g_print ("Now set pipeline in state playing\n");
