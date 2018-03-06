@@ -158,11 +158,13 @@ gst_g_scream_tx_init (GstgScreamTx * scream)
 
   scream->srcpad = gst_pad_new_from_static_template (&src_factory, "src");
   GST_PAD_SET_PROXY_CAPS (scream->srcpad);
-  gst_element_add_pad (GST_ELEMENT (scream), scream->srcpad);
+  gst_element_add_pad (GST_ELEMENT (scream), scream->srcpad)
 
   scream->silent = TRUE;
 
-  //bind_communication (GST_ELEMENT (scream));
+  // Potentially optional!
+  // bind_communication (GST_ELEMENT (scream));
+
 }
 
 static void
@@ -253,6 +255,35 @@ gst_g_scream_tx_chain (GstPad * pad, GstObject * parent, GstBuffer * buf)
 
   if(once < 1){
     task1 = gst_task_new((GstTaskFunction)task_print_loop, NULL, NULL);
+
+    // g_print("Task started1 \n");
+    // g_rec_mutex_init(mutex1);
+    // g_print("Task started2 \n");
+
+    // gst_task_set_lock(task1, mutex1);
+    mutex.lock();
+    gst_task_start(task1);
+    mutex.unlock();
+
+    g_print("Task started \n");
+  }else if (once >5) {
+    gst_task_stop(task1);
+  }
+
+  once++;
+  //return gst_pad_push (scream->srcpad, buf);
+  // Detta ^ bör ske i en annan tråd som kontinuerligt tar data ifrån rtpqueue och skickar datat till udpsocket.
+}
+  scream = GST_GSCREAMTX (parent);
+
+  if (scream->silent == FALSE)
+  g_print ("Have data of size %" G_GSIZE_FORMAT" bytes!\n",
+      gst_buffer_get_size (buf));
+
+  //Här bör buf, som bör vara i rtpform, matas in i rtpqueue som huvuduppgift.
+
+  if(once < 1){
+    task1 = gst_task_new((GstTaskFunction)task_print_loop, NULL, NULL);
     gst_task_set_lock(task1, mutex1);
     gst_task_start(task1);
 
@@ -297,6 +328,9 @@ gscreamtx_init (GstPlugin * gscreamtx)
 static void
 bind_communication (GstElement * scream)
 {
+
+  //Might not need udp elements! If not: need to include sink and source pads in the upcoming udp sink element in the pipeline
+
   GstElement *rtpbin, *sendrtp_udpsink, *video_rtcp_udpsrc,
       *send_rtcp_udpsink, *sendrtcp_funnel, *sendrtp_funnel;
   GstElement *videosrc;
@@ -305,9 +339,6 @@ bind_communication (GstElement * scream)
   gint recv_video_rtcp_port = 5004;
 
   rtpbin = gst_element_factory_make ("rtpbin", NULL);
-
-  g_print("Stop being annoying1 \n");
-
   /* muxed rtcp */
   sendrtcp_funnel = gst_element_factory_make ("funnel", "send_rtcp_funnel");
   send_rtcp_udpsink = gst_element_factory_make ("udpsink", NULL);
@@ -330,9 +361,9 @@ bind_communication (GstElement * scream)
   gst_element_link_pads (sendrtp_funnel, "src", sendrtp_udpsink, "sink");
   gst_element_link_pads (rtpbin, "send_rtp_src_0", sendrtp_funnel, "sink_%u");
   gst_element_link_pads (sendrtcp_funnel, "src", send_rtcp_udpsink, "sink");
-  g_print("Stop being annoying2 \n");
+
   gst_element_link_pads (rtpbin, "send_rtcp_src_0", sendrtcp_funnel, "sink_%u");
-  g_print("Stop being annoying3 \n");
+
 
   video_rtcp_udpsrc = gst_element_factory_make ("udpsrc", NULL);
   g_object_set (video_rtcp_udpsrc, "port", recv_video_rtcp_port, NULL);
